@@ -15,6 +15,7 @@ def crash(event):
 
 def a_key(event):
     return event[0] == 'INPUT' and event[1].type == SDL_KEYDOWN and event[1].key == 97
+
 def a_key_up(event):
     return event[0] == 'INPUT' and event[1].type == SDL_KEYUP and event[1].key == 97
 
@@ -29,7 +30,22 @@ def right_up(event):
 
 def left_up(event):
     return event[0] == 'INPUT' and event[1].type == SDL_KEYUP and event[1].key == SDLK_LEFT
+class guard:
+    def __init__(self, viego):
+        self.viego = viego
 
+    def enter(self,e):
+        self.viego.is_guarding = True
+
+    def exit(self,e):
+        self.viego.frame = 0
+        self.viego.is_guarding = False
+    def do(self):
+        self.viego.frame = (self.viego.frame +1) % 60
+        pass
+
+    def draw(self):
+        pass
 class dash:
     def __init__(self, viego):
         self.viego = viego
@@ -39,6 +55,7 @@ class dash:
         pass
     def do(self):
         self.viego.frame =  (self.viego.frame +1) % 60
+        self.viego.x += self.viego.dir * 3.0
         pass
     def draw(self):
         f = sheet_list.viego_dash[self.viego.frame // 10]
@@ -53,6 +70,7 @@ class walk:
         self.viego = viego
 
     def enter(self,e):
+
         if right_down(e) or left_up(e):
             self.viego.dir = self.viego.face_dir = 1
         elif left_down(e) or right_up(e):
@@ -64,6 +82,9 @@ class walk:
         pass
 
     def do(self):
+        if self.viego.is_dashing:
+            self.viego.state_machine.cur_state = self.viego.DASH
+            return
         self.viego.frame=(self.viego.frame+1)%50
         self.viego.x += self.viego.dir * 1.5
         pass
@@ -74,6 +95,25 @@ class walk:
             self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
         else:  # face_dir == -1: # left
             self.viego.img.clip_composite_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h',self.viego.x, self.viego.y,f[2],f[3])
+class Sleep:
+    def __init__(self, viego):
+        self.viego = viego
+
+    def enter(self,e):
+        self.viego.dir = 0
+        self.viego.face_dir = 0
+
+    def exit(self,e):
+        self.viego.frame = 0
+
+    def do(self):
+        if (self.viego.frame < 600):
+            self.viego.frame += 1
+
+    def draw(self):
+        f = sheet_list.viego_sleep[self.viego.frame // 100]
+        self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+
 
 class Idle:
     def __init__(self, viego):
@@ -89,14 +129,19 @@ class Idle:
 
     def do(self):
         self.viego.frame=(self.viego.frame+1)%30
-        if get_time() - self.viego.wait_start_time > 5.0:
+        if get_time() - self.viego.wait_start_time > 2.0:
             # 2초 대기 후 자동으로 Sleep 상태로 전이
             self.viego.state_machine.handle_state_event(('TIMEOUT', None))
         pass
 
     def draw(self):
         f = sheet_list.viego_idle[self.viego.frame // 10]
-        self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+        if self.viego.face_dir == 1:  # right
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+        else:  # face_dir == -1: # left
+            self.viego.img.clip_composite_draw(
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x, self.viego.y,f[2], f[3])
+
     pass
 
 class Viego:
@@ -105,17 +150,23 @@ class Viego:
     def __init__(self):
         if Viego.img is None:
             Viego.img = load_image('Sprite_Sheets/main_character.png')
-        self.x, self.y = 400, 300
+        self.x, self.y = 400, 90
         self.dir = 0
         self.frame = 0
         self.face_dir = 1
+
+        self.is_dashing = False
+        self.is_guarding = False
+
         self.IDLE = Idle(self)
         self.WALK = walk(self)
         self.DASH = dash(self)
+        self.SLEEP = Sleep(self)
         self.state_machine = StateMachine(
             self.IDLE,
             {
-                self.IDLE: {time_out: self.IDLE, right_down: self.WALK, left_down: self.WALK, right_up: self.WALK, left_up: self.WALK },
+                self.SLEEP: {space_down: self.IDLE, right_down: self.WALK, left_down: self.WALK},
+                self.IDLE: {time_out: self.SLEEP, right_down: self.WALK, left_down: self.WALK, right_up: self.WALK, left_up: self.WALK },
                 self.WALK: {right_up: self.IDLE, left_up: self.IDLE,right_down: self.IDLE, left_down: self.IDLE, a_key : self.DASH},
                 self.DASH: {a_key_up: self.WALK,right_up: self.IDLE, left_up: self.IDLE,right_down: self.IDLE, left_down: self.IDLE}
             }
@@ -125,6 +176,11 @@ class Viego:
         self.state_machine.update()
 
     def handle_event(self, event):
+        if event.type == SDL_KEYDOWN and event.key == 97:
+            self.is_dashing = True
+        elif event.type == SDL_KEYUP and event.key == 97:
+            self.is_dashing = False
+
         self.state_machine.handle_state_event(('INPUT', event))
         pass
 

@@ -1,29 +1,9 @@
 from pico2d import *
-import sheet_list
+from viego import Viego
 
 open_canvas(800,600)
 running = True
 img = load_image('Sprite_Sheets/main_character.png')
-
-def walk():
-    if not sheet_list.main_character_walk:
-        return  # 프레임이 없으면 종료
-    for frame in sheet_list.main_character_walk:
-        clear_canvas()
-        # frame은 (x, y, w, h)
-        img.clip_draw(frame[0], 1545 - frame[1] - frame[3], frame[2], frame[3], 400, 300)
-        update_canvas()
-        delay(0.1)
-def desh():
-    if not sheet_list.main_character_dash:
-        return  # 프레임이 없으면 종료
-    for frame in sheet_list.main_character_dash:
-        clear_canvas()
-        # frame은 (x, y, w, h)
-        img.clip_draw(frame[0], 1545 - frame[1] - frame[3], frame[2], frame[3], 400, 300)
-        update_canvas()
-        delay(0.1)
-
 def handle_events():
     global running
     events = get_events()
@@ -33,14 +13,16 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             running = False
         else:
-            pass
+            viego.handle_event(event)
+
 def world_reset():
     global running
     global world
+    global viego
 
+    viego = Viego()
     world = []
-
-
+    world.append(viego)
     pass
 def update_world():
     for o in world:

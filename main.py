@@ -1,8 +1,28 @@
 from pico2d import *
-open_canvas()
-running = True
+import sheet_list
 
+open_canvas(800,600)
+running = True
 img = load_image('Sprite_Sheets/main_character.png')
+
+def walk():
+    if not sheet_list.main_character_walk:
+        return  # 프레임이 없으면 종료
+    for frame in sheet_list.main_character_walk:
+        clear_canvas()
+        # frame은 (x, y, w, h)
+        img.clip_draw(frame[0], 1545 - frame[1] - frame[3], frame[2], frame[3], 400, 300)
+        update_canvas()
+        delay(0.1)
+def desh():
+    if not sheet_list.main_character_dash:
+        return  # 프레임이 없으면 종료
+    for frame in sheet_list.main_character_dash:
+        clear_canvas()
+        # frame은 (x, y, w, h)
+        img.clip_draw(frame[0], 1545 - frame[1] - frame[3], frame[2], frame[3], 400, 300)
+        update_canvas()
+        delay(0.1)
 
 def handle_events():
     global running
@@ -16,6 +36,7 @@ def handle_events():
 while running:
     handle_events()
     clear_canvas()
-    img.draw(400, 300)
+    walk()
+    desh()
     update_canvas()
 close_canvas()

@@ -32,11 +32,33 @@ def handle_events():
             running = False
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             running = False
+        else:
+            pass
+def world_reset():
+    global running
+    global world
 
+    world = []
+
+
+    pass
+def update_world():
+    for o in world:
+        o.update()
+    pass
+def render_world():
+    clear_canvas()
+    for o in world:
+        o.draw()
+    update_canvas()
+    pass
+
+world_reset()
 while running:
     handle_events()
-    clear_canvas()
-    walk()
-    desh()
-    update_canvas()
+    update_world()
+    render_world()
+    delay(0.1)
+
+
 close_canvas()

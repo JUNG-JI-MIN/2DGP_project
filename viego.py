@@ -29,29 +29,55 @@ def left_up(event):
     return event[0] == 'INPUT' and event[1].type == SDL_KEYUP and event[1].key == SDLK_LEFT
 
 
-
-class Idle:
-    def __init__(self, char):
-        self.char = char
+class walk:
+    def __init__(self, viego):
+        self.viego = viego
 
     def enter(self,e):
-        self.char.dir = 0
-        self.char.wait_start_time = get_time()
+        if right_down(e) or left_up(e):
+            self.viego.dir = self.viego.face_dir = 1
+        elif left_down(e) or right_up(e):
+            self.viego.dir = self.viego.face_dir = -1
+        pass
 
     def exit(self,e):
-        self.char.frame = 0
+        self.viego.frame = 0
         pass
 
     def do(self):
-        self.char.frame=(self.char.frame+1)%3
-        if get_time() - self.char.wait_start_time > 5.0:
-            # 2초 대기 후 자동으로 Sleep 상태로 전이
-            self.char.state_machine.handle_state_event(('TIMEOUT', None))
+        self.viego.frame=(self.viego.frame+1)%50
+        self.viego.x += self.viego.dir * 3
         pass
 
     def draw(self):
-        f = sheet_list.viego_idle[self.char.frame]
-        self.char.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.char.x, self.char.y)
+        f = sheet_list.viego_walk[self.viego.frame // 10]
+        if self.viego.face_dir == 1:  # right
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+        else:  # face_dir == -1: # left
+            self.viego.img.clip_composite_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h',self.viego.x, self.viego.y,f[2],f[3])
+
+class Idle:
+    def __init__(self, viego):
+        self.viego = viego
+
+    def enter(self,e):
+        self.viego.dir = 0
+        self.viego.wait_start_time = get_time()
+
+    def exit(self,e):
+        self.viego.frame = 0
+        pass
+
+    def do(self):
+        self.viego.frame=(self.viego.frame+1)%30
+        if get_time() - self.viego.wait_start_time > 5.0:
+            # 2초 대기 후 자동으로 Sleep 상태로 전이
+            self.viego.state_machine.handle_state_event(('TIMEOUT', None))
+        pass
+
+    def draw(self):
+        f = sheet_list.viego_idle[self.viego.frame // 10]
+        self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
     pass
 
 class Viego:
@@ -65,10 +91,12 @@ class Viego:
         self.frame = 0
         self.face_dir = 1
         self.IDLE = Idle(self)
+        self.WALK = walk(self)
         self.state_machine = StateMachine(
             self.IDLE,
             {
-                self.IDLE: {time_out: self.IDLE}
+                self.IDLE: {time_out: self.IDLE, right_down: self.WALK, left_down: self.WALK, right_up: self.WALK, left_up: self.WALK },
+                self.WALK: {right_up: self.IDLE, left_up: self.IDLE,right_down: self.IDLE, left_down: self.IDLE},
             }
         )
 

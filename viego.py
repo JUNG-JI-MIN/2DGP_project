@@ -15,6 +15,8 @@ def crash(event):
 
 def a_key(event):
     return event[0] == 'INPUT' and event[1].type == SDL_KEYDOWN and event[1].key == 97
+def a_key_up(event):
+    return event[0] == 'INPUT' and event[1].type == SDL_KEYUP and event[1].key == 97
 
 def right_down(event):
     return event[0] == 'INPUT' and event[1].type == SDL_KEYDOWN and event[1].key == SDLK_RIGHT
@@ -28,6 +30,23 @@ def right_up(event):
 def left_up(event):
     return event[0] == 'INPUT' and event[1].type == SDL_KEYUP and event[1].key == SDLK_LEFT
 
+class dash:
+    def __init__(self, viego):
+        self.viego = viego
+    def enter(self,e):
+        pass
+    def exit(self,e):
+        pass
+    def do(self):
+        self.viego.frame =  (self.viego.frame +1) % 60
+        pass
+    def draw(self):
+        f = sheet_list.viego_dash[self.viego.frame // 10]
+        if self.viego.face_dir == 1:  # right
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+        else:  # face_dir == -1: # left
+            self.viego.img.clip_composite_draw(
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x, self.viego.y,f[2], f[3])
 
 class walk:
     def __init__(self, viego):
@@ -46,7 +65,7 @@ class walk:
 
     def do(self):
         self.viego.frame=(self.viego.frame+1)%50
-        self.viego.x += self.viego.dir * 3
+        self.viego.x += self.viego.dir * 1.5
         pass
 
     def draw(self):
@@ -92,11 +111,13 @@ class Viego:
         self.face_dir = 1
         self.IDLE = Idle(self)
         self.WALK = walk(self)
+        self.DASH = dash(self)
         self.state_machine = StateMachine(
             self.IDLE,
             {
                 self.IDLE: {time_out: self.IDLE, right_down: self.WALK, left_down: self.WALK, right_up: self.WALK, left_up: self.WALK },
-                self.WALK: {right_up: self.IDLE, left_up: self.IDLE,right_down: self.IDLE, left_down: self.IDLE},
+                self.WALK: {right_up: self.IDLE, left_up: self.IDLE,right_down: self.IDLE, left_down: self.IDLE, a_key : self.DASH},
+                self.DASH: {a_key_up: self.WALK,right_up: self.IDLE, left_up: self.IDLE,right_down: self.IDLE, left_down: self.IDLE}
             }
         )
 

@@ -1,35 +1,10 @@
-from pico2d import load_image, get_time, update_canvas
-from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT
+from pico2d import load_image, get_time
+from sdl2 import SDL_KEYDOWN, SDL_KEYUP
+from events import space_down, time_out, a_key, a_key_up,s_key_down,s_key_up, right_down, left_down, right_up, left_up
 from state_machine import StateMachine
 import sheet_list
 
-# 이벤트를 확인하는 함수
-def space_down(event): # state_event 튜플
-    return event[0] == 'INPUT' and event[1].type == SDL_KEYDOWN and event[1].key == SDLK_SPACE
 
-def time_out(event):
-    return event[0] == 'TIMEOUT'
-
-def crash(event):
-    return event[0] == 'CRASH'
-
-def a_key(event):
-    return event[0] == 'INPUT' and event[1].type == SDL_KEYDOWN and event[1].key == 97
-
-def a_key_up(event):
-    return event[0] == 'INPUT' and event[1].type == SDL_KEYUP and event[1].key == 97
-
-def right_down(event):
-    return event[0] == 'INPUT' and event[1].type == SDL_KEYDOWN and event[1].key == SDLK_RIGHT
-
-def left_down(event):
-    return event[0] == 'INPUT' and event[1].type == SDL_KEYDOWN and event[1].key == SDLK_LEFT
-
-def right_up(event):
-    return event[0] == 'INPUT' and event[1].type == SDL_KEYUP and event[1].key == SDLK_RIGHT
-
-def left_up(event):
-    return event[0] == 'INPUT' and event[1].type == SDL_KEYUP and event[1].key == SDLK_LEFT
 class guard:
     def __init__(self, viego):
         self.viego = viego
@@ -41,11 +16,11 @@ class guard:
         self.viego.frame = 0
         self.viego.is_guarding = False
     def do(self):
-        self.viego.frame = (self.viego.frame +1) % 60
         pass
 
     def draw(self):
-        pass
+        f = sheet_list.viego_guard
+        self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
 class dash:
     def __init__(self, viego):
         self.viego = viego
@@ -162,13 +137,15 @@ class Viego:
         self.WALK = walk(self)
         self.DASH = dash(self)
         self.SLEEP = Sleep(self)
+        self.GUARD = guard(self)
         self.state_machine = StateMachine(
             self.IDLE,
             {
                 self.SLEEP: {space_down: self.IDLE, right_down: self.WALK, left_down: self.WALK},
-                self.IDLE: {time_out: self.SLEEP, right_down: self.WALK, left_down: self.WALK, right_up: self.WALK, left_up: self.WALK },
-                self.WALK: {right_up: self.IDLE, left_up: self.IDLE,right_down: self.IDLE, left_down: self.IDLE, a_key : self.DASH},
-                self.DASH: {a_key_up: self.WALK,right_up: self.IDLE, left_up: self.IDLE,right_down: self.IDLE, left_down: self.IDLE}
+                self.IDLE: {time_out: self.SLEEP, right_down: self.WALK, left_down: self.WALK, right_up: self.WALK, left_up: self.WALK, s_key_down: self.GUARD},
+                self.WALK: {right_up: self.IDLE, left_up: self.IDLE, right_down: self.IDLE, left_down: self.IDLE, a_key: self.DASH, s_key_down: self.GUARD},
+                self.DASH: {a_key_up: self.WALK, right_up: self.IDLE, left_up: self.IDLE, right_down: self.IDLE, left_down: self.IDLE, s_key_down: self.GUARD},
+                self.GUARD: {s_key_up: self.IDLE}
             }
         )
 

@@ -1,21 +1,21 @@
-main_character_idle = (
+viego_idle = (
 (488, 10, 52, 46),
 (540, 9, 53, 47),
 (592, 12, 53, 46),
 )
 
-main_character_jump = (
+viego_jump = (
 (541,72,53,41),
 (594,60,52,51)
 )
-main_character_walk =(
+viego_walk =(
 (55,10,53,45),
 (108,11,52,45),
 (162,11,52,45),
 (216,13,52,44),
 (325,16,52,45)
 )
-main_character_dash =(
+viego_dash =(
 (1,59,48,43),
 (50,59,49,43),
 (104,59,51,43),

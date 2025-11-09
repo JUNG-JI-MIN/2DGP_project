@@ -2,7 +2,7 @@ from pico2d import load_image, get_time, load_font, draw_rectangle
 from pyvisalgo.welzl import min_circle_trivial
 from sdl2 import SDL_KEYDOWN, SDL_KEYUP
 from events import space_down, time_out, a_key, a_key_up, s_key_down, s_key_up, right_down, left_down, right_up, \
-    left_up, up_down, up_up
+    left_up, up_down, up_up, z_key_down
 from state_machine import StateMachine
 import sheet_list
 import game_framework
@@ -37,10 +37,10 @@ class guard:
     def draw(self):
         f = sheet_list.viego_guard
         if self.viego.face_dir == 1:
-            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x + self.viego.face_dir *5, self.viego.y)
         else:
             self.viego.img.clip_composite_draw(
-                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x, self.viego.y,f[2], f[3])
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x -25/2 + f[2]/2+ self.viego.face_dir *5,self.viego.y -45/2 + f[3]/2,f[2], f[3])
 class jump:
 
     def __init__(self, viego):
@@ -113,10 +113,10 @@ class jump:
     def draw(self):
         f = sheet_list.viego_jump
         if self.viego.face_dir == 1:  # right
-            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x,self.viego.y)
         else:
             self.viego.img.clip_composite_draw(
-                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x, self.viego.y, f[2], f[3])
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x -25/2 + f[2]/2,self.viego.y -45/2 + f[3]/2, f[2], f[3])
 class dash:
     def __init__(self, viego):
         self.viego = viego
@@ -132,10 +132,10 @@ class dash:
     def draw(self):
         f = sheet_list.viego_dash[int(self.viego.frame)]
         if self.viego.face_dir == 1:  # right
-            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x,self.viego.y -45/2 + f[3]/2)
         else:  # face_dir == -1: # left
             self.viego.img.clip_composite_draw(
-                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x, self.viego.y,f[2], f[3])
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x -25/2 + f[2]/2,self.viego.y -45/2 + f[3]/2,f[2], f[3])
 class walk:
     def __init__(self, viego):
         self.viego = viego
@@ -163,9 +163,9 @@ class walk:
     def draw(self):
         f = sheet_list.viego_walk[int(self.viego.frame)]
         if self.viego.face_dir == 1:  # right
-            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x -25/2 + f[2]/2,self.viego.y -45/2 + f[3]/2)
         else:  # face_dir == -1: # left
-            self.viego.img.clip_composite_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h',self.viego.x, self.viego.y,f[2],f[3])
+            self.viego.img.clip_composite_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h',self.viego.x,self.viego.y,f[2],f[3])
 class Sleep:
     def __init__(self, viego):
         self.viego = viego
@@ -183,8 +183,9 @@ class Sleep:
 
     def draw(self):
         f = sheet_list.viego_sleep[int(self.viego.frame)]
-        self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+        self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x -25/2 + f[2]/2,self.viego.y -45/2 + f[3]/2)
 class attack:
+    attack_range = ((),(),(),(),())
     def __init__(self, viego):
         self.viego = viego
         self.count = 0
@@ -193,30 +194,36 @@ class attack:
 
     def enter(self,e):
         # 이전 공격에서 1.0초 이내에 다시 공격하면 콤보 증가
+        self.viego.frame = 0
+
         if get_time() - self.attack_timer < self.combo_time_limit:
             self.count = (self.count + 1) % 5  # 0~4 순환
         else:
             self.count = 0  # 시간이 지나면 첫 번째 공격으로
 
-        self.viego.frame = 0
-        self.attack_timer = get_time()
+        self.viego.x += self.viego.face_dir * WALK_SPEED_PPS * game_framework.frame_time * 50
+
     def exit(self,e):
+        self.attack_timer = get_time()
         pass
 
     def do(self):
-        frame = (6,6,5,9,7)  # 각 공격 모션의 프레임 수
-        if int(self.viego.frame) < frame[self.count]:
-            self.viego.frame = (self.viego.frame + self.viego.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+        acombo = (6, 6, 5, 9, 7)  # 각 공격 모션의 프레임 수
+        if int(self.viego.frame) < acombo[self.count]:
+            self.viego.frame = (self.viego.frame + self.viego.ATTACK_FRAME_PER_ACTION * self.viego.ATTACK_SPEED * game_framework.frame_time)
         else:
-            self.viego.state_machine.cur_state = self.viego.IDLE
+            self.viego.state_machine.handle_state_event(('TIMEOUT', None))
+
 
     def draw(self):
-        f = sheet_list.viego_attack[self.count][int(self.viego.frame)]
+        acombo = (6, 6, 5, 9, 7)
+        index = min(int(self.viego.frame), acombo[self.count] - 1)
+        f = sheet_list.viego_attack[self.count][index]
         if self.viego.face_dir == 1:  # right
-            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x -25/2 + f[2]/2,self.viego.y -45/2 + f[3]/2)
         else:  # face_dir == -1: # left
             self.viego.img.clip_composite_draw(
-                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x, self.viego.y, f[2], f[3])
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x,self.viego.y -45/2 + f[3]/2, f[2], f[3])
 
 
 class Idle:
@@ -226,6 +233,7 @@ class Idle:
     def enter(self,e):
         self.viego.is_dashing = False
         self.viego.dir = 0
+        self.viego.frame = 0
         self.viego.wait_start_time = get_time()
 
     def exit(self,e):
@@ -245,7 +253,7 @@ class Idle:
             self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
         else:  # face_dir == -1: # left
             self.viego.img.clip_composite_draw(
-                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x, self.viego.y,f[2], f[3])
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x -25/2 + f[2]/2,self.viego.y -45/2 + f[3]/2,f[2], f[3])
 
     pass
 
@@ -262,6 +270,7 @@ class Viego:
         self.DASH_FRAME_PER_ACTION = 6
         self.JUMP_FRAME_PER_ACTION = 2
         self.ATTACK_FRAME_PER_ACTION = 5
+        self.ATTACK_SPEED = 2.5
 
         self.font = load_font('ENCR10B.TTF', 16)
         self.x, self.y = 400, 90
@@ -285,12 +294,12 @@ class Viego:
             self.IDLE,
             {
                 self.SLEEP: {space_down: self.IDLE, right_down: self.WALK, left_down: self.WALK},
-                self.IDLE: {time_out: self.SLEEP, right_down: self.WALK, left_down: self.WALK, right_up: self.WALK, left_up: self.WALK, s_key_down: self.GUARD, up_down : self.JUMP},
-                self.WALK: {right_up: self.IDLE, left_up: self.IDLE, right_down: self.IDLE, left_down: self.IDLE, a_key: self.DASH, s_key_down: self.GUARD, up_down : self.JUMP},
-                self.DASH: {a_key_up: self.WALK, right_up: self.IDLE, left_up: self.IDLE, right_down: self.IDLE, left_down: self.IDLE, s_key_down: self.GUARD, up_down : self.JUMP},
-                self.GUARD: {s_key_up: self.IDLE},
+                self.IDLE: {time_out: self.SLEEP, right_down: self.WALK, left_down: self.WALK, right_up: self.WALK, left_up: self.WALK, s_key_down: self.GUARD, up_down : self.JUMP,z_key_down : self.ATTACK},
+                self.WALK: {right_up: self.IDLE, left_up: self.IDLE, right_down: self.IDLE, left_down: self.IDLE, a_key: self.DASH, s_key_down: self.GUARD, up_down : self.JUMP,z_key_down : self.ATTACK},
+                self.DASH: {a_key_up: self.WALK, right_up: self.IDLE, left_up: self.IDLE, right_down: self.IDLE, left_down: self.IDLE, s_key_down: self.GUARD, up_down : self.JUMP,z_key_down : self.ATTACK},
+                self.GUARD: {s_key_up: self.IDLE,z_key_down : self.ATTACK},
                 self.JUMP: {time_out: self.IDLE,left_down : self.JUMP, right_down : self.JUMP, right_up: self.JUMP, left_up: self.JUMP,up_up : self.JUMP},
-                self.ATTACK: {}
+                self.ATTACK: {time_out : self.IDLE,s_key_down: self.GUARD}
             }
         )
 
@@ -317,4 +326,4 @@ class Viego:
     def draw(self):
         self.state_machine.draw()
         draw_rectangle(*self.get_bb())
-        self.font.draw(self.x-20, self.y+30, f'({self.x:.2f},{self.y:.2f})' , (255, 255, 0))
+        self.font.draw(self.x-20, self.y+30, f'({self.x:.2f},{self.y:.2f},{self.ATTACK.count})' , (255, 255, 0))

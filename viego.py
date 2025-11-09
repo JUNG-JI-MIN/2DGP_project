@@ -185,12 +185,26 @@ class Sleep:
         f = sheet_list.viego_sleep[int(self.viego.frame)]
         self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x -25/2 + f[2]/2,self.viego.y -45/2 + f[3]/2)
 class attack:
-    attack_range = ((),(),(),(),())
+    attack_range = ((50,45),(50,45),(50,45),(50,45),(50,45))
     def __init__(self, viego):
         self.viego = viego
         self.count = 0
         self.attack_timer = 0
         self.combo_time_limit = 1.0  # 콤보 타임 제한 (초)
+    def get_attack_range(self):
+        if self.viego.face_dir == 1:
+            return (
+                self.viego.x + (30 * self.viego.face_dir) - attack.attack_range[self.count][0] / 2 + 10,
+                self.viego.y - attack.attack_range[self.count][1] / 2,
+                self.viego.x + (30 * self.viego.face_dir) + attack.attack_range[self.count][0] / 2 + 10,
+                self.viego.y + attack.attack_range[self.count][1] / 2
+            )
+        return (
+            self.viego.x + (30 * self.viego.face_dir) - attack.attack_range[self.count][0] / 2,
+            self.viego.y - attack.attack_range[self.count][1] / 2,
+            self.viego.x + (30 * self.viego.face_dir) + attack.attack_range[self.count][0] / 2,
+            self.viego.y + attack.attack_range[self.count][1] / 2
+        )
 
     def enter(self,e):
         # 이전 공격에서 1.0초 이내에 다시 공격하면 콤보 증가
@@ -264,6 +278,13 @@ class Viego:
         if Viego.img is None:
             Viego.img = load_image('Sprite_Sheets/main_character.png')
 
+        self.HP = 5
+        self.ste = 100
+
+        self.str = 10
+        self.int = 10
+        self.dex = 10
+
         self.IDLE_FRAME_PER_ACTION  = 3
         self.SLEEP_FRAME_PER_ACTION = 7
         self.WALK_FRAME_PER_ACTION = 5
@@ -326,4 +347,5 @@ class Viego:
     def draw(self):
         self.state_machine.draw()
         draw_rectangle(*self.get_bb())
+        draw_rectangle(*self.ATTACK.get_attack_range())
         self.font.draw(self.x-20, self.y+30, f'({self.x:.2f},{self.y:.2f},{self.ATTACK.count})' , (255, 255, 0))

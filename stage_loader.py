@@ -8,12 +8,11 @@ class Background:
         self.scroll_speed = scroll_speed
         self.x = 0
 
-    def update(self, frame_time):
+    def update(self):
         # 스크롤 속도에 따라 x 좌표 업데이트
-        self.x = (self.x + self.scroll_speed * frame_time) % self.image.w
+        self.x = (self.x + self.scroll_speed * game_framework.frame_time) % self.image.w
 
     def draw(self):
-        # 배경 이미지 그리기
-        # self.image.draw_tile(self.x, 0, ...)
+        self.image.draw(400, 300, self.image.w/2+600, 600)
         pass
 

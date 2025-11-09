@@ -22,7 +22,7 @@ def init():
     global running
     global world
     global viego
-
+    global soop_back
     viego = Viego()
     game_world.add_object(viego,1)
     pass

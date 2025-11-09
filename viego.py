@@ -37,7 +37,38 @@ class guard:
         else:
             self.viego.img.clip_composite_draw(
                 f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x, self.viego.y,f[2], f[3])
+class jump:
+    def __init__(self, viego):
+        self.viego = viego
+        self.vertical_speed = 0
+        self.horizontal_speed = 0
+        self.gravity = 800
 
+    def enter(self, e):
+        self.viego.frame = 0
+        # 점프 시작 시 초기 수평 속도 설정
+        if self.viego.is_dashing:
+            self.horizontal_speed = self.viego.dir * DASH_SPEED_PSS
+        elif self.viego.dir != 0:
+            self.horizontal_speed = self.viego.dir * RUN_SPEED_PPS
+        else:
+            self.horizontal_speed = 0
+
+    def exit(self, e):
+        self.viego.frame = 0
+        pass
+
+    def do(self):
+
+        pass
+
+    def draw(self):
+        f = sheet_list.viego_jump[int(self.viego.frame)]
+        if self.viego.face_dir == 1:  # right
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+        else:  # face_dir == -1: # left
+            self.viego.img.clip_composite_draw(
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x, self.viego.y, f[2], f[3])
 class dash:
     def __init__(self, viego):
         self.viego = viego

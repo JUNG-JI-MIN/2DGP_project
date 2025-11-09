@@ -1,9 +1,9 @@
-from pico2d import load_image, get_time
+from pico2d import load_image, get_time, load_font
 from sdl2 import SDL_KEYDOWN, SDL_KEYUP
 from events import space_down, time_out, a_key, a_key_up,s_key_down,s_key_up, right_down, left_down, right_up, left_up
 from state_machine import StateMachine
 import sheet_list
-
+import game_framework
 
 class guard:
     def __init__(self, viego):
@@ -66,7 +66,7 @@ class walk:
             self.viego.state_machine.cur_state = self.viego.DASH
             return
         self.viego.frame=(self.viego.frame+1)%50
-        self.viego.x += self.viego.dir * 1.5
+        self.viego.x += self.viego.dir * 1.5 * game_framework.frame_time
         pass
 
     def draw(self):
@@ -130,6 +130,7 @@ class Viego:
     def __init__(self):
         if Viego.img is None:
             Viego.img = load_image('Sprite_Sheets/main_character.png')
+        self.font = load_font('corbelb.ttf', 16)
         self.x, self.y = 400, 90
         self.dir = 0
         self.frame = 0
@@ -168,3 +169,4 @@ class Viego:
 
     def draw(self):
         self.state_machine.draw()
+        self.font.draw(self.x, self.y, self.dir, self.face_dir, self.is_dashing, self.is_guarding)

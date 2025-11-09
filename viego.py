@@ -1,7 +1,7 @@
 from pico2d import load_image, get_time, load_font, draw_rectangle
 from sdl2 import SDL_KEYDOWN, SDL_KEYUP
 from events import space_down, time_out, a_key, a_key_up, s_key_down, s_key_up, right_down, left_down, right_up, \
-    left_up, up_down
+    left_up, up_down, up_up
 from state_machine import StateMachine
 import sheet_list
 import game_framework
@@ -14,7 +14,7 @@ WALK_SPEED_PPS = (WALK_SPEED_MPS * PIXEL_PER_METER) # 초당 픽셀 이동 거�
 JUMP_HEIGHT_PSS = WALK_SPEED_PPS * 1.5 # 점프 높이 (Pixel Per Second Speed)
 DASH_SPEED_PSS = WALK_SPEED_PPS * 2 # 대쉬 속도 (Pixel Per Second Speed)
 
-GRAVITY = 1000 / 3 # 중력 가속도 cm / s^2
+GRAVITY = 1000 / 1.5 # 중력 가속도 cm / s^2
 
 TIME_PER_ACTION = 1
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
@@ -45,14 +45,37 @@ class jump:
     def __init__(self, viego):
         self.viego = viego
         self.velocity = JUMP_HEIGHT_PSS
+        self.is_holding = False
+        self.min_jump_speed = JUMP_HEIGHT_PSS  # 최소 점프 속도
+        self.max_jump_speed = JUMP_HEIGHT_PSS  # 최대 점프 속도
+
     def enter(self, e):
+        if up_up(e):
+            self.is_holding = False
+            return
+        if not right_down(e) and not left_down(e) and not right_up(e) and not left_up(e):
+            self.velocity = self.min_jump_speed
         self.viego.is_jumping = True
+        self.is_holding = True
+        # 점프 시작시 방향 설정
+        if right_down(e):
+            self.viego.dir = self.viego.face_dir = 1
+        elif left_down(e):
+            self.viego.dir = self.viego.face_dir = -1
         pass
     def exit(self, e):
         self.viego.is_jumping = False
-        self.viego.y = 90
+        self.is_holding = False
+        if not right_down(e) and not left_down(e) and not right_up(e) and not left_up(e) and not up_up(e):
+            self.viego.y = 90
         pass
     def do(self):
+        # 점프 키를 누르고 있고 상승 중일 때만 속도 증가
+        if self.is_holding and self.velocity > 0:
+            # 속도를 점진적으로 증가 (최대값 제한)
+            self.velocity = min(self.velocity + JUMP_HEIGHT_PSS * 2 * game_framework.frame_time,
+                                self.max_jump_speed)
+
         if self.viego.is_dashing:
             self.viego.x += self.viego.dir * DASH_SPEED_PSS * game_framework.frame_time
         elif self.viego.dir != 0:
@@ -60,6 +83,10 @@ class jump:
 
         self.velocity -= GRAVITY * game_framework.frame_time
         self.viego.y += self.velocity * game_framework.frame_time
+
+        if self.viego.y < 90:
+            self.viego.y = 90
+            self.viego.state_machine.handle_state_event( ('TIMEOUT', None) )
 
     def draw(self):
         f = sheet_list.viego_jump
@@ -207,7 +234,7 @@ class Viego:
                 self.WALK: {right_up: self.IDLE, left_up: self.IDLE, right_down: self.IDLE, left_down: self.IDLE, a_key: self.DASH, s_key_down: self.GUARD, up_down : self.JUMP},
                 self.DASH: {a_key_up: self.WALK, right_up: self.IDLE, left_up: self.IDLE, right_down: self.IDLE, left_down: self.IDLE, s_key_down: self.GUARD, up_down : self.JUMP},
                 self.GUARD: {s_key_up: self.IDLE},
-                self.JUMP: {}
+                self.JUMP: {time_out: self.IDLE,left_down : self.JUMP, right_down : self.JUMP, right_up: self.JUMP, left_up: self.JUMP,up_up : self.JUMP},
             }
         )
 
@@ -222,14 +249,16 @@ class Viego:
 
         self.state_machine.handle_state_event(('INPUT', event))
         pass
+    def get_foot_y(self):
+        return self.y - 22
     def get_bb(self):
         # 바운딩 박스 (left, bottom, right, top)
         return (self.x - 10,
                 self.y - 22,
-                self.x + 10,
-                self.y + 10)
+                self.x + 20,
+                self.y + 22)
 
     def draw(self):
         self.state_machine.draw()
         draw_rectangle(*self.get_bb())
-        self.font.draw(self.x-20, self.y+30, f'(Time: {get_time():.2f})' , (255, 255, 0))
+        self.font.draw(self.x-20, self.y+30, f'({self.x:.2f},{self.y:.2f})' , (255, 255, 0))

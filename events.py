@@ -15,8 +15,6 @@ def crash(event):
 
 def a_key(event):
     return event[0] == 'INPUT' and event[1].type == SDL_KEYDOWN and event[1].key == 97
-
-
 def a_key_up(event):
     return event[0] == 'INPUT' and event[1].type == SDL_KEYUP and event[1].key == 97
 

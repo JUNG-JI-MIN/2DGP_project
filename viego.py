@@ -20,7 +20,12 @@ class guard:
 
     def draw(self):
         f = sheet_list.viego_guard
-        self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+        if self.viego.face_dir == 1:
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+        else:
+            self.viego.img.clip_composite_draw(
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x, self.viego.y,f[2], f[3])
+
 class dash:
     def __init__(self, viego):
         self.viego = viego

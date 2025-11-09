@@ -5,6 +5,18 @@ from state_machine import StateMachine
 import sheet_list
 import game_framework
 
+PIXEL_PER_METER = (10.0 / 0.3) # 10 pixel 30 cm.
+RUN_SPEED_KMPH = 20.0 # Km / Hour
+RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0) # Meter / Minute
+RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0) # Meter / Second
+RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER) # 초당 픽셀 이동 거리 (Pixel Per Second)
+JUMP_HEIGHT_PSS = RUN_SPEED_PPS * 1.5 # 점프 높이 (Pixel Per Second Speed)
+DASH_SPEED_PSS = RUN_SPEED_PPS * 2 # 대쉬 속도 (Pixel Per Second Speed)
+
+TIME_PER_ACTION = 1
+ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+FRAMES_PER_ACTION = 3
+
 class guard:
     def __init__(self, viego):
         self.viego = viego
@@ -34,11 +46,11 @@ class dash:
     def exit(self,e):
         pass
     def do(self):
-        self.viego.frame =  (self.viego.frame +1) % 60
-        self.viego.x += self.viego.dir * 3.0
+        self.viego.frame =  (self.viego.frame + self.viego.DASH_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 6
+        self.viego.x += self.viego.dir * DASH_SPEED_PSS * game_framework.frame_time
         pass
     def draw(self):
-        f = sheet_list.viego_dash[self.viego.frame // 10]
+        f = sheet_list.viego_dash[int(self.viego.frame)]
         if self.viego.face_dir == 1:  # right
             self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
         else:  # face_dir == -1: # left
@@ -65,12 +77,12 @@ class walk:
         if self.viego.is_dashing:
             self.viego.state_machine.cur_state = self.viego.DASH
             return
-        self.viego.frame=(self.viego.frame+1)%50
-        self.viego.x += self.viego.dir * 1.5 * game_framework.frame_time
+        self.viego.frame=(self.viego.frame + self.viego.WALK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 5
+        self.viego.x += self.viego.dir * RUN_SPEED_PPS * game_framework.frame_time
         pass
 
     def draw(self):
-        f = sheet_list.viego_walk[self.viego.frame // 10]
+        f = sheet_list.viego_walk[int(self.viego.frame)]
         if self.viego.face_dir == 1:  # right
             self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
         else:  # face_dir == -1: # left
@@ -87,11 +99,11 @@ class Sleep:
         self.viego.frame = 0
 
     def do(self):
-        if (self.viego.frame < 600):
-            self.viego.frame += 1
+        if (self.viego.frame < 6):
+            self.viego.frame = (self.viego.frame + self.viego.SLEEP_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
     def draw(self):
-        f = sheet_list.viego_sleep[self.viego.frame // 100]
+        f = sheet_list.viego_sleep[int(self.viego.frame)]
         self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
 
 
@@ -108,14 +120,14 @@ class Idle:
         pass
 
     def do(self):
-        self.viego.frame=(self.viego.frame+1)%30
+        self.viego.frame=(self.viego.frame + self.viego.IDLE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 3
         if get_time() - self.viego.wait_start_time > 2.0:
             # 2초 대기 후 자동으로 Sleep 상태로 전이
             self.viego.state_machine.handle_state_event(('TIMEOUT', None))
         pass
 
     def draw(self):
-        f = sheet_list.viego_idle[self.viego.frame // 10]
+        f = sheet_list.viego_idle[int(self.viego.frame)]
         if self.viego.face_dir == 1:  # right
             self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
         else:  # face_dir == -1: # left
@@ -130,6 +142,12 @@ class Viego:
     def __init__(self):
         if Viego.img is None:
             Viego.img = load_image('Sprite_Sheets/main_character.png')
+
+        self.IDLE_FRAME_PER_ACTION  = 3
+        self.SLEEP_FRAME_PER_ACTION = 7
+        self.WALK_FRAME_PER_ACTION = 5
+        self.DASH_FRAME_PER_ACTION = 6
+
         self.font = load_font('ENCR10B.TTF', 16)
         self.x, self.y = 400, 90
         self.dir = 0

@@ -169,4 +169,4 @@ class Viego:
 
     def draw(self):
         self.state_machine.draw()
-        self.font.draw(self.x, self.y, self.dir, self.face_dir, self.is_dashing, self.is_guarding)
+        self.font.draw(self.x-20, self.y+30, f'(Time: {get_time():.2f})' , (255, 255, 0))

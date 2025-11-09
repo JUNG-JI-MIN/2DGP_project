@@ -1,4 +1,5 @@
 from pico2d import load_image, get_time, load_font, draw_rectangle
+from pyvisalgo.welzl import min_circle_trivial
 from sdl2 import SDL_KEYDOWN, SDL_KEYUP
 from events import space_down, time_out, a_key, a_key_up, s_key_down, s_key_up, right_down, left_down, right_up, \
     left_up, up_down, up_up
@@ -11,10 +12,10 @@ WALK_SPEED_KMPH = 20.0 # Km / Hour
 WALK_SPEED_MPM = (WALK_SPEED_KMPH * 1000.0 / 60.0) # Meter / Minute
 WALK_SPEED_MPS = (WALK_SPEED_MPM / 60.0) # Meter / Second
 WALK_SPEED_PPS = (WALK_SPEED_MPS * PIXEL_PER_METER) # 초당 픽셀 이동 거리 (Pixel Per Second)
-JUMP_HEIGHT_PSS = WALK_SPEED_PPS * 1.5 # 점프 높이 (Pixel Per Second Speed)
+JUMP_HEIGHT_PSS = WALK_SPEED_PPS # 점프 높이 (Pixel Per Second Speed)
 DASH_SPEED_PSS = WALK_SPEED_PPS * 2 # 대쉬 속도 (Pixel Per Second Speed)
 
-GRAVITY = 1000 / 1.5 # 중력 가속도 cm / s^2
+GRAVITY = 1000 / 3  # 중력 가속도 cm / s^2
 
 TIME_PER_ACTION = 1
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
@@ -46,47 +47,68 @@ class jump:
         self.viego = viego
         self.velocity = JUMP_HEIGHT_PSS
         self.is_holding = False
-        self.min_jump_speed = JUMP_HEIGHT_PSS  # 최소 점프 속도
-        self.max_jump_speed = JUMP_HEIGHT_PSS  # 최대 점프 속도
+        self.min_jump_speed = JUMP_HEIGHT_PSS * 0.7  # 최소 점프 속도
+        self.max_jump_speed = JUMP_HEIGHT_PSS * 3  # 최대 점프 속도
 
     def enter(self, e):
         if up_up(e):
             self.is_holding = False
             return
-        if not right_down(e) and not left_down(e) and not right_up(e) and not left_up(e):
+        if up_down(e):
             self.velocity = self.min_jump_speed
-        self.viego.is_jumping = True
-        self.is_holding = True
-        # 점프 시작시 방향 설정
+            self.viego.is_jumping = True
+            self.is_holding = True
+
+        # 방향 설정 개선
         if right_down(e):
             self.viego.dir = self.viego.face_dir = 1
         elif left_down(e):
             self.viego.dir = self.viego.face_dir = -1
-        pass
-    def exit(self, e):
-        self.viego.is_jumping = False
-        self.is_holding = False
-        if not right_down(e) and not left_down(e) and not right_up(e) and not left_up(e) and not up_up(e):
-            self.viego.y = 90
-        pass
-    def do(self):
-        # 점프 키를 누르고 있고 상승 중일 때만 속도 증가
-        if self.is_holding and self.velocity > 0:
-            # 속도를 점진적으로 증가 (최대값 제한)
-            self.velocity = min(self.velocity + JUMP_HEIGHT_PSS * 2 * game_framework.frame_time,
-                                self.max_jump_speed)
+        elif right_up(e):
+            # 오른쪽 키를 뗐을 때만 멈춤 (왼쪽 키가 안 눌려있으면)
+            if self.viego.dir == 1:  # 오른쪽으로 가고 있었다면
+                self.viego.dir = 0
+        elif left_up(e):
+            # 왼쪽 키를 뗐을 때만 멈춤 (오른쪽 키가 안 눌려있으면)
+            if self.viego.dir == -1:  # 왼쪽으로 가고 있었다면
+                self.viego.dir = 0
 
+    def exit(self, e):
+        if up_up(e):
+            self.viego.is_jumping = False
+            self.is_holding = False
+
+    def do(self):
+        # 1. 점프 키를 누르고 있고 상승 중일 때만 속도 증가
+        if self.is_holding and self.velocity > 0:
+            self.velocity = min(
+                self.velocity + self.min_jump_speed * 2 * game_framework.frame_time,
+                self.max_jump_speed
+            )
+
+        # 2. 중력은 항상 적용 (속도 감소)
+        self.velocity -= GRAVITY * game_framework.frame_time
+
+        # 3. y 좌표 업데이트
+        self.viego.y += self.velocity * game_framework.frame_time
+
+        # 4. 착지 감지
+        if self.viego.y < 90:
+            self.viego.y = 90
+            self.viego.is_jumping = False
+            if self.viego.is_dashing:
+                self.viego.state_machine.cur_state = self.viego.DASH
+            elif self.viego.dir != 0:
+                self.viego.state_machine.cur_state = self.viego.WALK
+            else:
+                self.viego.state_machine.handle_state_event(('TIMEOUT', None))
+            return
+
+        # 5. 좌우 이동
         if self.viego.is_dashing:
             self.viego.x += self.viego.dir * DASH_SPEED_PSS * game_framework.frame_time
         elif self.viego.dir != 0:
             self.viego.x += self.viego.dir * WALK_SPEED_PPS * game_framework.frame_time
-
-        self.velocity -= GRAVITY * game_framework.frame_time
-        self.viego.y += self.velocity * game_framework.frame_time
-
-        if self.viego.y < 90:
-            self.viego.y = 90
-            self.viego.state_machine.handle_state_event( ('TIMEOUT', None) )
 
     def draw(self):
         f = sheet_list.viego_jump
@@ -95,7 +117,6 @@ class jump:
         else:
             self.viego.img.clip_composite_draw(
                 f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x, self.viego.y, f[2], f[3])
-
 class dash:
     def __init__(self, viego):
         self.viego = viego
@@ -115,7 +136,6 @@ class dash:
         else:  # face_dir == -1: # left
             self.viego.img.clip_composite_draw(
                 f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x, self.viego.y,f[2], f[3])
-
 class walk:
     def __init__(self, viego):
         self.viego = viego
@@ -164,6 +184,39 @@ class Sleep:
     def draw(self):
         f = sheet_list.viego_sleep[int(self.viego.frame)]
         self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+class attack:
+    def __init__(self, viego):
+        self.viego = viego
+        self.count = 0
+        self.attack_timer = 0
+        self.combo_time_limit = 1.0  # 콤보 타임 제한 (초)
+
+    def enter(self,e):
+        # 이전 공격에서 1.0초 이내에 다시 공격하면 콤보 증가
+        if get_time() - self.attack_timer < self.combo_time_limit:
+            self.count = (self.count + 1) % 5  # 0~4 순환
+        else:
+            self.count = 0  # 시간이 지나면 첫 번째 공격으로
+
+        self.viego.frame = 0
+        self.attack_timer = get_time()
+    def exit(self,e):
+        pass
+
+    def do(self):
+        frame = (6,6,5,9,7)  # 각 공격 모션의 프레임 수
+        if int(self.viego.frame) < frame[self.count]:
+            self.viego.frame = (self.viego.frame + self.viego.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+        else:
+            self.viego.state_machine.cur_state = self.viego.IDLE
+
+    def draw(self):
+        f = sheet_list.viego_attack[self.count][int(self.viego.frame)]
+        if self.viego.face_dir == 1:  # right
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+        else:  # face_dir == -1: # left
+            self.viego.img.clip_composite_draw(
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x, self.viego.y, f[2], f[3])
 
 
 class Idle:
@@ -208,6 +261,7 @@ class Viego:
         self.WALK_FRAME_PER_ACTION = 5
         self.DASH_FRAME_PER_ACTION = 6
         self.JUMP_FRAME_PER_ACTION = 2
+        self.ATTACK_FRAME_PER_ACTION = 5
 
         self.font = load_font('ENCR10B.TTF', 16)
         self.x, self.y = 400, 90
@@ -225,6 +279,7 @@ class Viego:
         self.SLEEP = Sleep(self)
         self.GUARD = guard(self)
         self.JUMP = jump(self)
+        self.ATTACK = attack(self)
 
         self.state_machine = StateMachine(
             self.IDLE,
@@ -235,6 +290,7 @@ class Viego:
                 self.DASH: {a_key_up: self.WALK, right_up: self.IDLE, left_up: self.IDLE, right_down: self.IDLE, left_down: self.IDLE, s_key_down: self.GUARD, up_down : self.JUMP},
                 self.GUARD: {s_key_up: self.IDLE},
                 self.JUMP: {time_out: self.IDLE,left_down : self.JUMP, right_down : self.JUMP, right_up: self.JUMP, left_up: self.JUMP,up_up : self.JUMP},
+                self.ATTACK: {}
             }
         )
 

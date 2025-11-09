@@ -1,5 +1,6 @@
 from pico2d import *
 from viego import Viego
+import game_world
 
 open_canvas(800,600)
 running = True
@@ -21,17 +22,14 @@ def world_reset():
     global viego
 
     viego = Viego()
-    world = []
-    world.append(viego)
+    game_world.add_object(viego,1)
     pass
 def update_world():
-    for o in world:
-        o.update()
+    game_world.update()
     pass
 def render_world():
     clear_canvas()
-    for o in world:
-        o.draw()
+    game_world.draw()
     update_canvas()
     pass
 

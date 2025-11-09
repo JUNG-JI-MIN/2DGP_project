@@ -27,6 +27,7 @@ def init():
     game_world.add_object(viego,1)
     pass
 def finish():
+    game_world.clear()
     pass
 
 def update():

@@ -24,6 +24,9 @@ def s_key_down(event):
 def s_key_up(event):
     return event[0] == 'INPUT' and event[1].type == SDL_KEYUP and event[1].key == 115
 
+def z_key_down(event):
+    return event[0] == 'INPUT' and event[1].type == SDL_KEYDOWN and event[1].key == 122
+
 def right_down(event):
     return event[0] == 'INPUT' and event[1].type == SDL_KEYDOWN and event[1].key == SDLK_RIGHT
 

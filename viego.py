@@ -130,7 +130,7 @@ class Viego:
     def __init__(self):
         if Viego.img is None:
             Viego.img = load_image('Sprite_Sheets/main_character.png')
-        self.font = load_font('corbelb.ttf', 16)
+        self.font = load_font('ENCR10B.TTF', 16)
         self.x, self.y = 400, 90
         self.dir = 0
         self.frame = 0

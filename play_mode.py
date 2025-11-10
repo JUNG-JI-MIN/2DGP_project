@@ -22,14 +22,15 @@ def handle_events():
 def init():
     global running
     global world
-    global viego, monster
+    global viego, monsters
     global soop_back, grass
+
+
 
     soop_back = stage_loader.Background('background/soop_back.png',3)
     game_world.add_object(soop_back,0)
 
-    monsters = [monster.Ghost() for _ in range(3)]
-    game_world.add_objects(monsters,1)
+
 
     grass = stage_loader.Grass()
     game_world.add_object(grass,0)
@@ -37,6 +38,12 @@ def init():
     viego = Viego()
     game_world.add_object(viego,1)
 
+    monsters = [monster.Ghost(viego) for _ in range(3)]
+    game_world.add_objects(monsters, 1)
+
+    game_world.add_collision_pair('viego:monster', viego, None)
+    for m in monsters:
+        game_world.add_collision_pair('viego:monster', None, m)
     pass
 def finish():
     game_world.clear()
@@ -44,6 +51,9 @@ def finish():
 
 def update():
     game_world.update()
+    game_world.handle_collision()
+    game_world.handle_attack_collision()
+    game_world.handle_monster_attack_collision()
     pass
 
 def draw():

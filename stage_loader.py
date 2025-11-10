@@ -16,3 +16,12 @@ class Background:
         self.image.draw(400, 300, self.image.w/2+600, 600)
         pass
 
+class Grass:
+    def __init__(self):
+        self.image = load_image('background/grass.png')
+
+    def update(self):
+        pass
+
+    def draw(self):
+        self.image.draw(400, 10)

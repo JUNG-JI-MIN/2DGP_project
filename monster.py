@@ -14,6 +14,28 @@ ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 3
 
 animation_names = ['Idle']
+class fireball:
+    img = None
+
+    def __init__(self, x,y):
+        if fireball.img is None:
+            fireball.img = load_image('monster/dark_ghost.png')
+        self.font = load_font('ENCR10B.TTF', 16)
+
+        self.frame = 0
+
+        self.ATTACK_FRAME_PER_ACTION = 2
+        self.x = x
+        self.y = y
+
+    def update(self):
+        if (self.frame <2):
+            self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+        else:
+            game_world.remove_object(self)
+    def draw(self):
+        f = sheet_list.dark_ghost_attack[1][min(int(self.frame),0)]
+        fireball.img.clip_draw(f[0], 949 - f[1] - f[3], f[2], f[3], self.x, self.y)
 
 class Ghost:
     img = None
@@ -26,19 +48,23 @@ class Ghost:
         self.HP = 5
         self.die = False
         self.is_attacking = False
+        self.idle = False
+        self.walk = True
         self.int = 10
 
         self.IDLE_FRAME_PER_ACTION = 1
-        ATTACK_FRAME_PER_ACTION = 3
+        self.ATTACK_FRAME_PER_ACTION = 6
         self.DIE_FRAME_PER_ACTION = 10
+        self.RUN_FRAME_PER_ACTION = 8
 
         self.x = random.randint(0,800)
-        self.y = 70
-        self.dir = 0
+        self.y = 90
+        self.dir = 1
         self.frame = 0
         self.face_dir = 1
 
     def update(self):
+        prev = self.frame
         if self.die == True:
             if (self.frame <8):
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
@@ -47,22 +73,43 @@ class Ghost:
         elif self.is_attacking:
             if (self.frame <5):
                 self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+
             else:
-                game_world.remove_object(self)
+                self.is_attacking = False
+                self.face_dir = self.dir
+            if int(prev) < 2 <= int(self.frame):
+                if self.viego:
+                    ball = fireball(self.viego.x, self.viego.y)
+                    game_world.add_object(ball)
+        elif self.walk == True:
+            self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
+            self.frame = (self.frame + self.RUN_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 6
+            if self.x >= 800:
+                self.dir *= -1
+                self.face_dir *= -1
+            elif self.x <= 0:
+                self.dir *= -1
+                self.face_dir *= -1
+
         else:
             self.frame = (self.frame + self.IDLE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 6
 
     def draw(self):
-        f = sheet_list.dark_ghost_idle[min(int(self.frame),5)]
+        f = sheet_list.dark_ghost_idle[min(int(self.frame),5)] # 안전하게 인덱스 접근
         if self.die == True:
             f = sheet_list.dark_ghost_die[int(self.frame)]
+        elif self.is_attacking == True:
+            f = sheet_list.dark_ghost_attack[0][min(int(self.frame),4)] # 안전하게 인덱스 접근
+        elif self.walk == True:
+            f = sheet_list.dark_ghost_walk[min(int(self.frame),5)] # 안전하게 인덱스 접근
         self.font.draw(self.x - 70, self.y + 70, f'(HP : {self.HP:.2f})', (255, 255, 0))
-        if self.face_dir == 1:  # right
+        if self.face_dir == -1:  # right
             Ghost.img.clip_draw(f[0], 949 - f[1] - f[3], f[2], f[3], self.x, self.y)
         else:  # face_dir == -1: # left
             Ghost.img.clip_composite_draw(
-                f[0], 949 - f[1] - f[3], f[2], f[3], 0, 'h', self.x - 25 / 2 + f[2] / 2,
-                      self.y - 45 / 2 + f[3] / 2, f[2], f[3])
+                f[0], 949 - f[1] - f[3], f[2], f[3], 0, 'h', self.x,
+                      self.y , f[2], f[3])
+
         draw_rectangle(*self.get_bb())
         draw_rectangle(*self.get_attack_bb(),0,0,255)
 
@@ -99,4 +146,9 @@ class Ghost:
     def handle_monster_attack_collision(self,group, other):
         if group == 'viego:monster':
             if not self.is_attacking:
+                if (self.viego.x > self.x):
+                    self.face_dir = 1
+                else:
+                    self.face_dir = -1
+                self.frame = 0
                 self.is_attacking = True

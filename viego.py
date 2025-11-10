@@ -294,7 +294,7 @@ class Viego:
         self.ATTACK_SPEED = 2.5
 
         self.font = load_font('ENCR10B.TTF', 16)
-        self.x, self.y = 400, 90
+        self.x, self.y = 400, 50
         self.dir = 0
         self.frame = 0
         self.face_dir = 1

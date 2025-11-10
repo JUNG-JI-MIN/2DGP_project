@@ -93,8 +93,8 @@ class jump:
         self.viego.y += self.velocity * game_framework.frame_time
 
         # 4. 착지 감지
-        if self.viego.y < 90:
-            self.viego.y = 90
+        if self.viego.y < 50:
+            self.viego.y = 50
             self.viego.is_jumping = False
             if self.viego.is_dashing:
                 self.viego.state_machine.cur_state = self.viego.DASH
@@ -185,29 +185,16 @@ class Sleep:
         f = sheet_list.viego_sleep[int(self.viego.frame)]
         self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x -25/2 + f[2]/2,self.viego.y -45/2 + f[3]/2)
 class attack:
-    attack_range = ((50,45),(50,45),(50,45),(50,45),(50,45))
     def __init__(self, viego):
         self.viego = viego
         self.count = 0
         self.attack_timer = 0
         self.combo_time_limit = 1.0  # 콤보 타임 제한 (초)
-    def get_attack_range(self):
-        if self.viego.face_dir == 1:
-            return (
-                self.viego.x + (30 * self.viego.face_dir) - attack.attack_range[self.count][0] / 2 + 10,
-                self.viego.y - attack.attack_range[self.count][1] / 2,
-                self.viego.x + (30 * self.viego.face_dir) + attack.attack_range[self.count][0] / 2 + 10,
-                self.viego.y + attack.attack_range[self.count][1] / 2
-            )
-        return (
-            self.viego.x + (30 * self.viego.face_dir) - attack.attack_range[self.count][0] / 2,
-            self.viego.y - attack.attack_range[self.count][1] / 2,
-            self.viego.x + (30 * self.viego.face_dir) + attack.attack_range[self.count][0] / 2,
-            self.viego.y + attack.attack_range[self.count][1] / 2
-        )
+
 
     def enter(self,e):
         # 이전 공격에서 1.0초 이내에 다시 공격하면 콤보 증가
+        self.viego.is_attacking = True
         self.viego.frame = 0
 
         if get_time() - self.attack_timer < self.combo_time_limit:
@@ -218,6 +205,7 @@ class attack:
         self.viego.x += self.viego.face_dir * WALK_SPEED_PPS * game_framework.frame_time * 50
 
     def exit(self,e):
+        self.viego.is_attacking = False
         self.attack_timer = get_time()
         pass
 
@@ -232,6 +220,7 @@ class attack:
     def draw(self):
         acombo = (6, 6, 5, 9, 7)
         index = min(int(self.viego.frame), acombo[self.count] - 1)
+        draw_rectangle(*self.viego.get_attack_bb(),0,0,255)
         f = sheet_list.viego_attack[self.count][index]
         if self.viego.face_dir == 1:  # right
             self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x -25/2 + f[2]/2,self.viego.y -45/2 + f[3]/2)
@@ -275,6 +264,7 @@ class Viego:
     img = None
 
     def __init__(self):
+        self.attack_range = ((50, 45), (50, 45), (50, 45), (50, 45), (50, 45))
         if Viego.img is None:
             Viego.img = load_image('Sprite_Sheets/main_character.png')
 
@@ -291,7 +281,7 @@ class Viego:
         self.DASH_FRAME_PER_ACTION = 6
         self.JUMP_FRAME_PER_ACTION = 2
         self.ATTACK_FRAME_PER_ACTION = 5
-        self.ATTACK_SPEED = 2.5
+        self.ATTACK_SPEED = 0.25 * self.dex
 
         self.font = load_font('ENCR10B.TTF', 16)
         self.x, self.y = 400, 50
@@ -302,6 +292,9 @@ class Viego:
         self.is_dashing = False
         self.is_guarding = False
         self.is_jumping = False
+        self.is_attacking = False
+        self.mujuck_frame = 0
+        self.MUJUCK_TIME = 0.5  # 무적 지속 시간(초)
 
         self.IDLE = Idle(self)
         self.WALK = walk(self)
@@ -323,9 +316,27 @@ class Viego:
                 self.ATTACK: {time_out : self.IDLE,s_key_down: self.GUARD}
             }
         )
+    def get_attack_bb(self):
+        if self.face_dir == 1:
+            return (
+                self.x + (30 * self.face_dir) - self.attack_range[self.ATTACK.count][0] / 2 + 10,
+                self.y - self.attack_range[self.ATTACK.count][1] / 2,
+                self.x + (30 * self.face_dir) + self.attack_range[self.ATTACK.count][0] / 2 + 10,
+                self.y + self.attack_range[self.ATTACK.count][1] / 2
+            )
+        return (
+            self.x + (30 * self.face_dir) - self.attack_range[self.ATTACK.count][0] / 2,
+            self.y - self.attack_range[self.ATTACK.count][1] / 2,
+            self.x + (30 * self.face_dir) + self.attack_range[self.ATTACK.count][0] / 2,
+            self.y + self.attack_range[self.ATTACK.count][1] / 2
+        )
 
     def update(self):
         self.state_machine.update()
+        if self.mujuck_frame > 0.0:
+            self.mujuck_frame -= game_framework.frame_time
+            if self.mujuck_frame <= 0.0:
+                self.mujuck_frame = 0.0
 
     def handle_event(self, event):
         if event.type == SDL_KEYDOWN and event.key == 97:
@@ -344,8 +355,32 @@ class Viego:
                 self.x + 20,
                 self.y + 22)
 
+    def handle_collision(self, group, other):
+        if group == 'viego:monster':
+            if self.mujuck_frame > 0.0:
+                return
+
+            if self.is_guarding:
+                self.ste -= 5
+                if self.ste < 0:
+                    self.ste = 0
+                self.mujuck_frame = self.MUJUCK_TIME
+                return
+
+            # 무적이 아니면 데미지 적용 후 무적 시작
+            self.HP -= other.int * 0.1
+            if self.HP < 0:
+                self.HP = 0
+            self.mujuck_frame = self.MUJUCK_TIME
+
+    def handle_attack_collision(self,group, other):
+        if group == 'viego:monster':
+            pass
+    def handle_monster_attack_collision(self,group, other):
+        if group == 'viego:monster':
+            pass
+
     def draw(self):
         self.state_machine.draw()
         draw_rectangle(*self.get_bb())
-        draw_rectangle(*self.ATTACK.get_attack_range())
-        self.font.draw(self.x-20, self.y+30, f'({self.x:.2f},{self.y:.2f},{self.ATTACK.count})' , (255, 255, 0))
+        self.font.draw(self.x-70, self.y+30, f'(HP : {self.HP:.2f},SP : {self.ste:.2f})' , (255, 255, 0))

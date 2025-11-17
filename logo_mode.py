@@ -1,6 +1,6 @@
 from pico2d import *
 import game_framework
-import play_mode
+import village_mode
 import events
 image = None
 running = True
@@ -32,4 +32,4 @@ def handle_events():
         if event.type == SDL_QUIT:
             game_framework.quit()
         elif event.type == SDL_KEYDOWN:  # 아무 키나 누르면
-            game_framework.change_mode(play_mode)
+            game_framework.change_mode(village_mode)

@@ -93,6 +93,11 @@ def clear_except_player():
         pairs[0][:] = [obj for obj in pairs[0] if obj == player]
         pairs[1][:] = [obj for obj in pairs[1] if obj == player]
 
+    if player:
+        player.x = 100
+        player.y = 100
+        player.frame = 0
+
 collision_pairs = {}
 def add_collision_pair(group, a, b):
     if group not in collision_pairs:

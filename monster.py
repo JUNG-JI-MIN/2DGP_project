@@ -47,7 +47,7 @@ class Ghost:
         self.font = load_font('ENCR10B.TTF', 16)
         self.viego = viego
 
-        self.HP = 5
+        self.HP = 100
         self.die = False
         self.is_attacking = False
         self.idle = False
@@ -150,8 +150,9 @@ class Ghost:
 
     def handle_attack_collision(self, group, other):
         if group == 'viego:monster':
-            if self.viego.is_attacking:
+            if self.viego.is_attacking and not self.viego.attack_hit_done :
                 self.HP -= self.viego.int / 10
+                self.viego.attack_hit_done = True
                 if self.HP <= 0:
                     self.die = True
                     self.frame = 0

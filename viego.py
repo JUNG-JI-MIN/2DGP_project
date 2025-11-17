@@ -10,11 +10,11 @@ import sheet_list
 import game_framework
 
 PIXEL_PER_METER = (10.0 / 0.3) # 10 pixel 30 cm.
-WALK_SPEED_KMPH = 20.0 # Km / Hour
+WALK_SPEED_KMPH = 10.0 # Km / Hour
 WALK_SPEED_MPM = (WALK_SPEED_KMPH * 1000.0 / 60.0) # Meter / Minute
 WALK_SPEED_MPS = (WALK_SPEED_MPM / 60.0) # Meter / Second
 WALK_SPEED_PPS = (WALK_SPEED_MPS * PIXEL_PER_METER) # 초당 픽셀 이동 거리 (Pixel Per Second)
-JUMP_HEIGHT_PSS = WALK_SPEED_PPS # 점프 높이 (Pixel Per Second Speed)
+JUMP_HEIGHT_PSS = WALK_SPEED_PPS * 2 # 점프 높이 (Pixel Per Second Speed)
 DASH_SPEED_PSS = WALK_SPEED_PPS * 2 # 대쉬 속도 (Pixel Per Second Speed)
 
 GRAVITY = 1000 / 3  # 중력 가속도 cm / s^2
@@ -22,6 +22,8 @@ GRAVITY = 1000 / 3  # 중력 가속도 cm / s^2
 TIME_PER_ACTION = 1
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 3
+
+
 
 class guard:
     def __init__(self, viego):
@@ -130,9 +132,15 @@ class dash:
     def exit(self,e):
         pass
     def do(self):
+        if self.viego.ste <= 0:
+            self.viego.is_dashing = False
+            self.viego.state_machine.cur_state = self.viego.WALK
+            self.viego.frame = 0
+            return
         self.viego.frame =  (self.viego.frame + self.viego.DASH_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 6
         self.viego.x += self.viego.dir * DASH_SPEED_PSS * game_framework.frame_time
-        pass
+        self.viego.ste -= 10 * game_framework.frame_time
+
     def draw(self):
         f = sheet_list.viego_dash[int(self.viego.frame)]
         screen_x, screen_y = game_world.render(self.viego, self.viego.x, self.viego.y)
@@ -185,6 +193,9 @@ class Sleep:
         self.viego.frame = 0
 
     def do(self):
+        self.viego.ste += 5 * game_framework.frame_time
+        if self.viego.ste > self.viego.max_ste:
+            self.viego.ste = self.viego.max_ste
         if (self.viego.frame < 6):
             self.viego.frame = (self.viego.frame + self.viego.SLEEP_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
@@ -202,6 +213,7 @@ class attack:
 
     def enter(self,e):
         # 이전 공격에서 1.0초 이내에 다시 공격하면 콤보 증가
+        self.viego.ste -= 10
         self.viego.is_attacking = True
         self.viego.frame = 0
 
@@ -290,7 +302,9 @@ class Viego:
             Viego.img = load_image('Sprite_Sheets/main_character.png')
 
         self.HP = 5
+        self.max_HP = 7
         self.ste = 100
+        self.max_ste = 100
 
         self.str = 10
         self.int = 10
@@ -315,7 +329,7 @@ class Viego:
         self.is_jumping = False
         self.is_attacking = False
         self.mujuck_frame = 0
-        self.MUJUCK_TIME = 0.5  # 무적 지속 시간(초)
+        self.MUJUCK_TIME = 1  # 무적 지속 시간(초)
 
         self.IDLE = Idle(self)
         self.WALK = walk(self)
@@ -353,6 +367,13 @@ class Viego:
         )
 
     def update(self):
+        if self.ste < self.max_ste:
+            if self.is_attacking or self.is_dashing or self.is_guarding:
+                pass
+            else:
+                self.ste += 5 * game_framework.frame_time
+                if self.ste > self.max_ste:
+                    self.ste = self.max_ste
         self.state_machine.update()
         if self.mujuck_frame > 0.0:
             self.mujuck_frame -= game_framework.frame_time
@@ -360,6 +381,10 @@ class Viego:
                 self.mujuck_frame = 0.0
 
     def handle_event(self, event):
+        if event.type == SDL_KEYDOWN and event.key == 122:  # z 키
+            if self.ste <= 10:
+                return
+
         if event.type == SDL_KEYDOWN and event.key == 97:
             self.is_dashing = True
         elif event.type == SDL_KEYUP and event.key == 97:

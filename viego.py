@@ -49,60 +49,47 @@ class guard:
             self.viego.img.clip_composite_draw(
                 f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', screen_x -25/2 + f[2]/2+ self.viego.face_dir *5,screen_y -45/2 + f[3]/2,f[2], f[3])
 class jump:
-
     def __init__(self, viego):
         self.viego = viego
-        self.velocity = JUMP_HEIGHT_PSS
-        self.is_holding = False
-        self.min_jump_speed = JUMP_HEIGHT_PSS * 0.7  # 최소 점프 속도
-        self.max_jump_speed = JUMP_HEIGHT_PSS * 3  # 최대 점프 속도
 
     def enter(self, e):
-        if up_up(e):
-            self.is_holding = False
-            return
         if up_down(e):
-            self.velocity = self.min_jump_speed
-            self.viego.is_jumping = True
-            self.is_holding = True
+            # 땅에 있을 때만 점프 가능
+            if self.viego.on_ground:
+                self.viego.velocity_y = self.viego.min_jump_speed
+                self.viego.is_jumping = True
+                self.viego.is_jump_holding = True
+                self.viego.on_ground = False
 
-        # 방향 설정 개선
+        # 방향 처리
         if right_down(e):
             self.viego.dir = self.viego.face_dir = 1
         elif left_down(e):
             self.viego.dir = self.viego.face_dir = -1
         elif right_up(e):
-            # 오른쪽 키를 뗐을 때만 멈춤 (왼쪽 키가 안 눌려있으면)
-            if self.viego.dir == 1:  # 오른쪽으로 가고 있었다면
+            if self.viego.dir == 1:
                 self.viego.dir = 0
         elif left_up(e):
-            # 왼쪽 키를 뗐을 때만 멈춤 (오른쪽 키가 안 눌려있으면)
-            if self.viego.dir == -1:  # 왼쪽으로 가고 있었다면
+            if self.viego.dir == -1:
                 self.viego.dir = 0
+
+        if up_up(e):
+            self.viego.is_jump_holding = False
 
     def exit(self, e):
         if up_up(e):
-            self.viego.is_jumping = False
-            self.is_holding = False
+            self.viego.is_jump_holding = False
 
     def do(self):
-        # 1. 점프 키를 누르고 있고 상승 중일 때만 속도 증가
-        if self.is_holding and self.velocity > 0:
-            self.velocity = min(
-                self.velocity + self.min_jump_speed * 2 * game_framework.frame_time,
-                self.max_jump_speed
+        # 점프 키를 누르고 있고 상승 중일 때 추가 가속
+        if self.viego.is_jump_holding and self.viego.velocity_y > 0:
+            self.viego.velocity_y = min(
+                self.viego.velocity_y + self.viego.min_jump_speed * 2 * game_framework.frame_time,
+                self.viego.max_jump_speed
             )
 
-        # 2. 중력은 항상 적용 (속도 감소)
-        self.velocity -= GRAVITY * game_framework.frame_time
-
-        # 3. y 좌표 업데이트
-        self.viego.y += self.velocity * game_framework.frame_time
-
-        # 4. 착지 감지
-        if self.viego.y < 50:
-            self.viego.y = 50
-            self.viego.is_jumping = False
+        # 착지 시 상태 전환
+        if self.viego.on_ground:
             if self.viego.is_dashing:
                 self.viego.state_machine.cur_state = self.viego.DASH
             elif self.viego.dir != 0:
@@ -111,7 +98,7 @@ class jump:
                 self.viego.state_machine.handle_state_event(('TIMEOUT', None))
             return
 
-        # 5. 좌우 이동
+        # 좌우 이동
         if self.viego.is_dashing:
             self.viego.x += self.viego.dir * DASH_SPEED_PSS * game_framework.frame_time
         elif self.viego.dir != 0:
@@ -120,11 +107,13 @@ class jump:
     def draw(self):
         f = sheet_list.viego_jump
         screen_x, screen_y = game_world.render(self.viego, self.viego.x, self.viego.y)
-        if self.viego.face_dir == 1:  # right
+        if self.viego.face_dir == 1:
             self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], screen_x, screen_y)
         else:
             self.viego.img.clip_composite_draw(
-                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', screen_x -25/2 + f[2]/2,screen_y -45/2 + f[3]/2, f[2], f[3])
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h',
+                screen_x - 25/2 + f[2]/2, screen_y - 45/2 + f[3]/2, f[2], f[3])
+
 class dash:
     def __init__(self, viego):
         self.viego = viego
@@ -216,6 +205,7 @@ class attack:
     def enter(self,e):
         # 이전 공격에서 1.0초 이내에 다시 공격하면 콤보 증가
         self.viego.ste -= 10
+        self.viego.attack_hit_done = False
         self.viego.is_attacking = True
         self.viego.frame = 0
 
@@ -302,7 +292,7 @@ class Viego:
         self.attack_range = ((50, 45), (50, 45), (50, 45), (50, 45), (50, 45))
         if Viego.img is None:
             Viego.img = load_image('Sprite_Sheets/main_character.png')
-
+        # 스텟
         self.HP = 5
         self.max_HP = 7
         self.ste = 100
@@ -312,6 +302,7 @@ class Viego:
         self.int = 10
         self.dex = 10
 
+        # 각 프레임 별 속도 설정
         self.IDLE_FRAME_PER_ACTION  = 3
         self.SLEEP_FRAME_PER_ACTION = 7
         self.WALK_FRAME_PER_ACTION = 5
@@ -326,13 +317,26 @@ class Viego:
         self.frame = 0
         self.face_dir = 1
 
+        # 물리 관련 추가
+        self.velocity_y = 0  # y축 속도
+        self.gravity = -800  # 중력 가속도 (음수: 아래로)
+        self.on_ground = False  # 땅에 있는지 여부
+
+        # 점프 관련
+        self.min_jump_speed = JUMP_HEIGHT_PSS * 1.5
+        self.max_jump_speed = JUMP_HEIGHT_PSS * 3
+        self.is_jump_holding = False
+
+        # 상태 플러그
         self.is_dashing = False
         self.is_guarding = False
         self.is_jumping = False
         self.is_attacking = False
+        self.attack_hit_done = False
         self.mujuck_frame = 0
         self.MUJUCK_TIME = 1  # 무적 지속 시간(초)
 
+        # 상태 머신 및 상태들
         self.IDLE = Idle(self)
         self.WALK = walk(self)
         self.DASH = dash(self)
@@ -369,6 +373,7 @@ class Viego:
         )
 
     def update(self):
+        # 스태미나 회복
         if self.ste < self.max_ste:
             if self.is_attacking or self.is_dashing or self.is_guarding:
                 pass
@@ -376,9 +381,27 @@ class Viego:
                 self.ste += 5 * game_framework.frame_time
                 if self.ste > self.max_ste:
                     self.ste = self.max_ste
+        # 중력 적용 (항상)
+        if not self.on_ground:
+            self.velocity_y += self.gravity * game_framework.frame_time
+            self.y += self.velocity_y * game_framework.frame_time
 
+        # 플랫폼 충돌 처리
+        self.check_platform_collision()
+
+        # 임시 바닥 충돌 (플랫폼 충돌로 교체 예정)
+        if not self.on_ground and self.y <= 50:
+            self.y = 50
+            self.velocity_y = 0
+            self.on_ground = True
+            self.is_jumping = False
+
+        # 스테이지 전환
         if self.x >= stage_loader.get_stage_size(play_mode.current_theme, play_mode.current_stage)[0]:
-            play_mode.change_stage(play_mode.current_theme, play_mode.current_stage + 1)
+            if play_mode.current_stage == stage_loader.get_max_stages(play_mode.current_theme):
+                play_mode.change_stage('snow', 1)
+            else:
+                play_mode.change_stage(play_mode.current_theme, play_mode.current_stage + 1)
 
         self.state_machine.update()
         if self.mujuck_frame > 0.0:
@@ -398,8 +421,10 @@ class Viego:
 
         self.state_machine.handle_state_event(('INPUT', event))
         pass
+
     def get_foot_y(self):
         return self.y - 22
+
     def get_bb(self):
         # 바운딩 박스 (left, bottom, right, top)
         return (self.x - 10,
@@ -407,7 +432,42 @@ class Viego:
                 self.x + 20,
                 self.y + 22)
 
-    def handle_collision(self, group, other):
+    def check_platform_collision(self):
+        """플랫폼 좌표 리스트를 직접 가져와 충돌 체크"""
+        # stage_loader에서 현재 스테이지의 플랫폼 좌표 가져오기
+        platforms = stage_loader.get_stage_platform(
+            play_mode.current_theme,
+            play_mode.current_stage
+        )
+
+        viego_left, viego_bottom, viego_right, viego_top = self.get_bb()
+        foot_y = self.get_foot_y()
+
+        self.on_ground = False
+
+        for plat_x, plat_y, plat_w, plat_h in platforms:
+            plat_left = plat_x - plat_w // 2
+            plat_bottom = plat_y - plat_h // 2
+            plat_right = plat_x + plat_w // 2
+            plat_top = plat_y + plat_h // 2
+
+            # 충돌 체크
+            if (viego_right > plat_left and viego_left < plat_right and
+                    viego_bottom < plat_top and viego_top > plat_bottom):
+
+                # 위에서 떨어지는 경우만 처리
+                if self.velocity_y <= 0 and (foot_y <= plat_top + 22 or foot_y >= plat_top):
+                    self.y = plat_top + 10  # 발 위치 조정
+                    self.velocity_y = 0
+                    self.on_ground = True
+                    self.is_jumping = False
+                    return
+
+        # 어떤 플랫폼과도 충돌하지 않으면
+        if self.on_ground:
+            self.on_ground = False
+
+    def handle_collision(self, group, other): # 몸통 충돌 처리
         if group == 'viego:monster':
             if self.mujuck_frame > 0.0:
                 return
@@ -425,10 +485,10 @@ class Viego:
                 self.HP = 0
             self.mujuck_frame = self.MUJUCK_TIME
 
-    def handle_attack_collision(self,group, other):
+    def handle_attack_collision(self,group, other): # 내 공격이 상대에게 충돌처리
         if group == 'viego:monster':
             pass
-    def handle_monster_attack_collision(self,group, other):
+    def handle_monster_attack_collision(self,group, other): # 상대 공격이 내게 충돌처리
         if group == 'viego:monster':
             pass
 
@@ -441,4 +501,4 @@ class Viego:
         offset_x = screen_x - self.x
         offset_y = screen_y - self.y
         draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y)
-        self.font.draw(screen_x - 70, screen_y + 30, f'(HP : {self.HP:.2f},SP : {self.ste:.2f})', (255, 255, 0))
+        self.font.draw(screen_x - 70, screen_y + 30, f'(HP : {self.HP:.2f},SP : {self.ste:.2f},CANJUMP : {self.on_ground})', (255, 255, 0))

@@ -171,6 +171,7 @@ class Sleep:
         self.viego = viego
 
     def enter(self,e):
+        self.frame = 0
         self.viego.dir = 0
         self.viego.face_dir = 0
 

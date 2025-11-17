@@ -63,6 +63,7 @@ class Ghost:
         self.frame = 0
         self.face_dir = 1
 
+
     def update(self):
         prev = self.frame
         if self.die == True:

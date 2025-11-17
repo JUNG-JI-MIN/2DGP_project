@@ -8,10 +8,8 @@ def space_down(event): # state_event 튜플
 def time_out(event):
     return event[0] == 'TIMEOUT'
 
-
-def crash(event):
-    return event[0] == 'CRASH'
-
+def key_down(event):
+    return event[0] == 'INPUT' and event[1].type == SDL_KEYDOWN
 
 def a_key(event):
     return event[0] == 'INPUT' and event[1].type == SDL_KEYDOWN and event[1].key == 97
@@ -27,9 +25,10 @@ def s_key_up(event):
 def z_key_down(event):
     return event[0] == 'INPUT' and event[1].type == SDL_KEYDOWN and event[1].key == 122
 
+
+
 def right_down(event):
     return event[0] == 'INPUT' and event[1].type == SDL_KEYDOWN and event[1].key == SDLK_RIGHT
-
 
 def left_down(event):
     return event[0] == 'INPUT' and event[1].type == SDL_KEYDOWN and event[1].key == SDLK_LEFT

@@ -3,6 +3,34 @@ import game_world
 import play_mode
 import game_framework
 
+
+def get_stage_size(theme, stage_num):
+    """테마와 스테이지 번호로 맵 크기 반환"""
+    stage_sizes = {
+        'forest': {  # 숲 테마 (3개 스테이지)
+            1: (2400, 600),
+            2: (2800, 600),
+            3: (3200, 600)
+        },
+        'desert': {  # 사막 테마 (4개 스테이지)
+            1: (3000, 800),
+            2: (3200, 800),
+            3: (3500, 800),
+            4: (4000, 800)
+        },
+        'castle': {  # 성 테마 (3개 스테이지)
+            1: (3500, 600),
+            2: (4000, 600),
+            3: (4500, 600)
+        },
+        'snow': {  # 눈 테마 (2개 스테이지)
+            1: (1000, 3000),
+            2: (1500, 3500)
+        }
+    }
+    # 테마가 없으면 기본값, 스테이지가 없으면 해당 테마의 1번
+    return stage_sizes.get(theme, {}).get(stage_num, (2400, 600))
+
 class Background:
     def __init__(self, image_file_name, scroll_speed):
         # 배경에 사용할 이미지 로드 (파일 이름을 인자로 받음)
@@ -13,9 +41,7 @@ class Background:
         self.y = 0
 
     def update(self):
-        # 스크롤 속도에 따라 x 좌표 업데이트
-        self.x = (self.x + self.scroll_speed * game_framework.frame_time) % self.image.w
-
+        pass
     def draw(self):
         # 카메라 위치 가져오기
         camera_x = play_mode.cam.x

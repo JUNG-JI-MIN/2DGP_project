@@ -25,8 +25,14 @@ def init():
     global world
     global viego, monsters
     global soop_back, grass, cam
+    global current_stage
 
-    # 맵 크기에 맞게 조정
+    current_theme = 'forest'
+    current_stage = 1
+
+    # 스테이지 크기에 맞게 카메라 생성
+    map_width, map_height = stage_loader.get_stage_size(current_theme, current_stage)
+    cam = camera.Camera(map_width, map_height, 800, 600)
     game_world.set_camera(cam)
 
     soop_back = stage_loader.Background('background/soop_back.png',3)

@@ -35,7 +35,9 @@ def finish():
 def update():
     game_world.update()
     game_world.handle_collision()
-
+    if viego.x > 750:
+        play_mode.change_stage('forest', 1)
+        game_framework.change_mode(play_mode)
 
 def draw():
     clear_canvas()

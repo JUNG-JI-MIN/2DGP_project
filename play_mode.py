@@ -9,7 +9,7 @@ import monster
 import camera
 running = True
 current_stage = 1
-current_theme = ('snow')  # 'forest', 'desert', 'castle', 'snow'
+current_theme = ('village')  #'village' 'forest', 'desert', 'castle', 'snow'
 cam = camera.Camera(2400, 600, 800, 600)
 def handle_events():
     global running
@@ -37,13 +37,12 @@ def init():
     back = stage_loader.Background(f'background/{current_theme}.png')
     game_world.add_object(back,0)
 
-    platform = stage_loader.platform(f'background/{current_theme}_platform.png',current_stage)
-    game_world.add_object(platform,0)
+    plat = stage_loader.platform(f'background/{current_theme}_platform.png',current_theme,current_stage)
+    game_world.add_object(plat,0)
 
     viego = Viego()
     game_world.add_object(viego, 1)
     game_world.set_player(viego)  # 플레이어로 설정
-    game_world.add_object(viego,1)
 
     monsters = [monster.Ghost(viego) for _ in range(3)]
     game_world.add_objects(monsters, 1)
@@ -85,8 +84,8 @@ def change_stage(theme, stage_num):
     game_world.clear_except_player()
 
     # 배경 재로드
-    back = stage_loader.Background(f'background/{theme}_platform.png')
+    back = stage_loader.Background(f'background/{theme}.png')
     game_world.add_object(back, 0)
 
-    plat = stage_loader.platform(theme,stage_num)
+    plat = stage_loader.platform(f'background/{theme}_platform.png',theme, stage_num)
     game_world.add_object(plat, 0)

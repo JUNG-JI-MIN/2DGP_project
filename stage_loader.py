@@ -3,7 +3,31 @@ import game_world
 import play_mode
 import game_framework
 
-
+def get_stage_platform(theme, stage_num):
+    #테마와 스테이지 별 발판 위치
+    stage_platforms = {
+        'forest': {  # 숲 테마 (3개 스테이지)
+            1: [(400, 30, 800, 60), (200, 80, 400, 60), (600, 100, 400, 60), (400, 200, 300, 60)],
+            2: [(500, 30, 900, 60), (300, 100, 500, 60), (700, 150, 400, 60), (450, 250, 350, 60)],
+            3: [(600, 30, 1000, 60), (400, 120, 600, 60), (800, 180, 500, 60), (500, 300, 400, 60)]
+        },
+        'desert': {  # 사막 테마 (4개 스테이지)
+            1: [(400, 30, 800, 60), (250, 90, 450, 60), (650, 110, 450, 60), (400, 220, 350, 60)],
+            2: [(450, 30, 850, 60), (300, 100, 500, 60), (700, 130, 450, 60), (500, 250, 400, 60)],
+            3: [(500, 30, 900, 60), (350, 110, 550, 60), (750, 150, 500, 60), (600, 280, 450, 60)],
+            4: [(550, 30, 950, 60), (400, 120, 600, 60), (800, 170, 550, 60), (700, 300, 500, 60)]
+        },
+        'castle': {  # 성 테마 (3개 스테이지)
+            1: [(400, 30, 800, 60), (200, 80, 400, 60), (600, 100, 400, 60), (400, 200, 300, 60)],
+            2: [(500, 30, 900, 60), (300, 100, 500, 60), (700, 150, 400, 60), (450, 250, 350, 60)],
+            3: [(600, 30, 1000, 60), (400, 120, 600, 60), (800, 180, 500, 60), (500, 300, 400, 60)]
+        },
+        'snow': {  # 눈 테마 (2개 스테이지)
+            1: [(300, 50, 700, 60), (150, 200, 400, 60), (500, 400, 400, 60)],
+            2: [(400, 70, 800, 60), (250, 250, 500, 60), (600, 450, 500, 60)]
+        }
+    }
+    return stage_platforms.get(theme, {}).get(stage_num, [])
 def get_stage_size(theme, stage_num):
     """테마와 스테이지 번호로 맵 크기 반환"""
     stage_sizes = {
@@ -31,11 +55,15 @@ def get_stage_size(theme, stage_num):
     # 테마가 없으면 기본값, 스테이지가 없으면 해당 테마의 1번
     return stage_sizes.get(theme, {}).get(stage_num, (2400, 600))
 
+def get_max_stages(theme):
+    """테마별 최대 스테이지 수 반환"""
+    max_stages = {'forest': 3, 'desert': 4, 'castle': 3, 'snow': 2}
+    return max_stages.get(theme, 1)
+
 class Background:
-    def __init__(self, image_file_name, scroll_speed):
+    def __init__(self, image_file_name):
         # 배경에 사용할 이미지 로드 (파일 이름을 인자로 받음)
         self.image = load_image(image_file_name)
-        self.scroll_speed = scroll_speed
         self.image_width = self.image.w
         self.x = 0
         self.y = 0
@@ -66,16 +94,12 @@ class Background:
                 )
 
 
-class Grass:
-    def __init__(self):
-        self.image = load_image('background/grass.png')
-        self.platforms = [
-            (400, 30, 800, 60),  # 바닥 플랫폼
-            (200, 80, 400, 60),  # 왼쪽 중간 플랫폼
-            (600, 100, 400, 60),  # 오른쪽 중간 플랫폼
-            (400, 200, 300, 60),  # 상단 플랫폼
-        ]
-
+class platform:
+    image = None
+    def __init__(self, theme, stage):
+        if platform.image is None:
+            platform.image = load_image(theme)
+        self.platforms = get_stage_platform(theme, stage)
     def update(self):
         pass
 
@@ -83,4 +107,9 @@ class Grass:
         # 각 발판마다 카메라 좌표 변환
         for x, y, w, h in self.platforms:
             screen_x, screen_y = game_world.render(self, x, y)
-            self.image.clip_draw(0, 0, w, h, screen_x, screen_y)
+            self.image.clip_draw(0, 0, platform.image.w, platform.image.h, screen_x, screen_y, w, h)
+            left = screen_x - w // 2
+            bottom = screen_y - h // 2
+            right = screen_x + w // 2
+            top = screen_y + h // 2
+            draw_rectangle(left, bottom, right, top,0,255,0)

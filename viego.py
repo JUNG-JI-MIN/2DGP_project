@@ -1,6 +1,8 @@
 from pico2d import load_image, get_time, load_font, draw_rectangle
 from pyvisalgo.welzl import min_circle_trivial
 from sdl2 import SDL_KEYDOWN, SDL_KEYUP
+
+import game_world
 from events import space_down, time_out, a_key, a_key_up, s_key_down, s_key_up, right_down, left_down, right_up, \
     left_up, up_down, up_up, z_key_down
 from state_machine import StateMachine
@@ -36,11 +38,12 @@ class guard:
 
     def draw(self):
         f = sheet_list.viego_guard
+        screen_x, screen_y = game_world.render(self.viego, self.viego.x, self.viego.y)
         if self.viego.face_dir == 1:
-            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x + self.viego.face_dir *5, self.viego.y)
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], screen_x + self.viego.face_dir *5, screen_y)
         else:
             self.viego.img.clip_composite_draw(
-                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x -25/2 + f[2]/2+ self.viego.face_dir *5,self.viego.y -45/2 + f[3]/2,f[2], f[3])
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', screen_x -25/2 + f[2]/2+ self.viego.face_dir *5,screen_y -45/2 + f[3]/2,f[2], f[3])
 class jump:
 
     def __init__(self, viego):
@@ -112,11 +115,12 @@ class jump:
 
     def draw(self):
         f = sheet_list.viego_jump
+        screen_x, screen_y = game_world.render(self.viego, self.viego.x, self.viego.y)
         if self.viego.face_dir == 1:  # right
-            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x,self.viego.y)
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], screen_x, screen_y)
         else:
             self.viego.img.clip_composite_draw(
-                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x -25/2 + f[2]/2,self.viego.y -45/2 + f[3]/2, f[2], f[3])
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', screen_x -25/2 + f[2]/2,screen_y -45/2 + f[3]/2, f[2], f[3])
 class dash:
     def __init__(self, viego):
         self.viego = viego
@@ -131,11 +135,12 @@ class dash:
         pass
     def draw(self):
         f = sheet_list.viego_dash[int(self.viego.frame)]
+        screen_x, screen_y = game_world.render(self.viego, self.viego.x, self.viego.y)
         if self.viego.face_dir == 1:  # right
-            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x,self.viego.y -45/2 + f[3]/2)
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], screen_x, screen_y -45/2 + f[3]/2)
         else:  # face_dir == -1: # left
             self.viego.img.clip_composite_draw(
-                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x -25/2 + f[2]/2,self.viego.y -45/2 + f[3]/2,f[2], f[3])
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', screen_x -25/2 + f[2]/2,screen_y -45/2 + f[3]/2,f[2], f[3])
 class walk:
     def __init__(self, viego):
         self.viego = viego
@@ -162,10 +167,11 @@ class walk:
 
     def draw(self):
         f = sheet_list.viego_walk[int(self.viego.frame)]
+        screen_x, screen_y = game_world.render(self.viego, self.viego.x, self.viego.y)
         if self.viego.face_dir == 1:  # right
-            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x -25/2 + f[2]/2,self.viego.y -45/2 + f[3]/2)
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], screen_x -25/2 + f[2]/2,screen_y  -45/2 + f[3]/2)
         else:  # face_dir == -1: # left
-            self.viego.img.clip_composite_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h',self.viego.x,self.viego.y,f[2],f[3])
+            self.viego.img.clip_composite_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h',screen_x, screen_y,f[2],f[3])
 class Sleep:
     def __init__(self, viego):
         self.viego = viego
@@ -184,7 +190,8 @@ class Sleep:
 
     def draw(self):
         f = sheet_list.viego_sleep[int(self.viego.frame)]
-        self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x -25/2 + f[2]/2,self.viego.y -45/2 + f[3]/2)
+        screen_x, screen_y = game_world.render(self.viego, self.viego.x, self.viego.y)
+        self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], screen_x -25/2 + f[2]/2,screen_y -45/2 + f[3]/2)
 class attack:
     def __init__(self, viego):
         self.viego = viego
@@ -221,13 +228,25 @@ class attack:
     def draw(self):
         acombo = (6, 6, 5, 9, 7)
         index = min(int(self.viego.frame), acombo[self.count] - 1)
-        draw_rectangle(*self.viego.get_attack_bb(),0,0,255)
+        # 공격 범위를 카메라 좌표로 변환
+        left, bottom, right, top = self.viego.get_attack_bb()
+        screen_x, screen_y = game_world.render(self.viego, self.viego.x, self.viego.y)
+        offset_x = screen_x - self.viego.x
+        offset_y = screen_y - self.viego.y
+        draw_rectangle(
+            left + offset_x,
+            bottom + offset_y,
+            right + offset_x,
+            top + offset_y,
+            0,0,255
+        )
         f = sheet_list.viego_attack[self.count][index]
+
         if self.viego.face_dir == 1:  # right
-            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x -25/2 + f[2]/2,self.viego.y -45/2 + f[3]/2)
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], screen_x -25/2 + f[2]/2,screen_y -45/2 + f[3]/2)
         else:  # face_dir == -1: # left
             self.viego.img.clip_composite_draw(
-                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x,self.viego.y -45/2 + f[3]/2, f[2], f[3])
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', screen_x, screen_y -45/2 + f[3]/2, f[2], f[3])
 
 
 class Idle:
@@ -253,11 +272,12 @@ class Idle:
 
     def draw(self):
         f = sheet_list.viego_idle[int(self.viego.frame)]
+        screen_x, screen_y = game_world.render(self.viego, self.viego.x, self.viego.y)
         if self.viego.face_dir == 1:  # right
-            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], self.viego.x, self.viego.y)
+            self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], screen_x, screen_y)
         else:  # face_dir == -1: # left
             self.viego.img.clip_composite_draw(
-                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', self.viego.x -25/2 + f[2]/2,self.viego.y -45/2 + f[3]/2,f[2], f[3])
+                f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', screen_x -25/2 + f[2]/2,screen_y -45/2 + f[3]/2,f[2], f[3])
 
     pass
 
@@ -383,5 +403,11 @@ class Viego:
 
     def draw(self):
         self.state_machine.draw()
-        draw_rectangle(*self.get_bb())
-        self.font.draw(self.x-70, self.y+30, f'(HP : {self.HP:.2f},SP : {self.ste:.2f})' , (255, 255, 0))
+
+        # 바운딩 박스도 카메라 좌표로
+        left, bottom, right, top = self.get_bb()
+        screen_x, screen_y = game_world.render(self, self.x, self.y)
+        offset_x = screen_x - self.x
+        offset_y = screen_y - self.y
+        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y)
+        self.font.draw(screen_x - 70, screen_y + 30, f'(HP : {self.HP:.2f},SP : {self.ste:.2f})', (255, 255, 0))

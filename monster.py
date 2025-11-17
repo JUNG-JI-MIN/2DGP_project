@@ -35,7 +35,9 @@ class fireball:
             game_world.remove_object(self)
     def draw(self):
         f = sheet_list.dark_ghost_attack[1][min(int(self.frame),0)]
-        fireball.img.clip_draw(f[0], 949 - f[1] - f[3], f[2], f[3], self.x, self.y)
+        screen_x, screen_y = game_world.render(self, self.x, self.y)  # 카메라 좌표로 변환
+
+        fireball.img.clip_draw(f[0], 949 - f[1] - f[3], f[2], f[3], screen_x, screen_y)
 
 class Ghost:
     img = None
@@ -97,22 +99,35 @@ class Ghost:
 
     def draw(self):
         f = sheet_list.dark_ghost_idle[min(int(self.frame),5)] # 안전하게 인덱스 접근
+        screen_x, screen_y = game_world.render(self, self.x, self.y) # 카메라 좌표로 변환
+
         if self.die == True:
             f = sheet_list.dark_ghost_die[int(self.frame)]
         elif self.is_attacking == True:
             f = sheet_list.dark_ghost_attack[0][min(int(self.frame),4)] # 안전하게 인덱스 접근
         elif self.walk == True:
             f = sheet_list.dark_ghost_walk[min(int(self.frame),5)] # 안전하게 인덱스 접근
-        self.font.draw(self.x - 70, self.y + 70, f'(HP : {self.HP:.2f})', (255, 255, 0))
+
+        self.font.draw(screen_x - 70, screen_y + 70, f'(HP : {self.HP:.2f})', (255, 255, 0))
+
         if self.face_dir == -1:  # right
-            Ghost.img.clip_draw(f[0], 949 - f[1] - f[3], f[2], f[3], self.x, self.y)
+            Ghost.img.clip_draw(f[0], 949 - f[1] - f[3], f[2], f[3], screen_x, screen_y)
         else:  # face_dir == -1: # left
             Ghost.img.clip_composite_draw(
-                f[0], 949 - f[1] - f[3], f[2], f[3], 0, 'h', self.x,
-                      self.y , f[2], f[3])
+                f[0], 949 - f[1] - f[3], f[2], f[3], 0, 'h', screen_x,
+                      screen_y , f[2], f[3])
 
-        draw_rectangle(*self.get_bb())
-        draw_rectangle(*self.get_attack_bb(),0,0,255)
+        # 카메라 오프셋 계산
+        offset_x = screen_x - self.x
+        offset_y = screen_y - self.y
+
+        # 바운딩 박스를 카메라 좌표로 변환
+        left, bottom, right, top = self.get_bb()
+        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y)
+
+        # 공격 범위를 카메라 좌표로 변환
+        left, bottom, right, top = self.get_attack_bb()
+        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y, 0, 0, 255)
 
     def handle_event(self, event):
         pass

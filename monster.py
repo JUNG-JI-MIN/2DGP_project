@@ -58,10 +58,12 @@ class Ghost:
         self.DIE_FRAME_PER_ACTION = 10
         self.RUN_FRAME_PER_ACTION = 8
 
-        self.x = random.randint(0,800)
+        self.x = random.randint(0,2400)
+        self.mx = self.x - 500
+        self.Mx = self.x + 500
         self.y = 90
         self.dir = 1
-        self.frame = 0
+        self.frame = random.randint(1,3)
         self.face_dir = 1
 
 
@@ -86,10 +88,10 @@ class Ghost:
         elif self.walk == True:
             self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
             self.frame = (self.frame + self.RUN_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 6
-            if self.x >= 800:
+            if self.x >= self.Mx:
                 self.dir *= -1
                 self.face_dir *= -1
-            elif self.x <= 0:
+            elif self.x <= self.mx:
                 self.dir *= -1
                 self.face_dir *= -1
 
@@ -173,8 +175,8 @@ class Yeti:
     img = None
 
     def __init__(self, viego=None):
-        if Ghost.img is None:
-            Ghost.img = load_image('monster/dark_ghost.png')
+        if Yeti.img is None:
+            Yeti.img = load_image('monster/Yeti.png')
         self.font = load_font('ENCR10B.TTF', 16)
         self.viego = viego
 
@@ -185,66 +187,64 @@ class Yeti:
         self.walk = True
         self.int = 10
 
-        self.IDLE_FRAME_PER_ACTION = 1
-        self.ATTACK_FRAME_PER_ACTION = 6
-        self.DIE_FRAME_PER_ACTION = 10
-        self.RUN_FRAME_PER_ACTION = 8
+        self.IDLE_FRAME_PER_ACTION = 1 # 3
+        self.ATTACK_FRAME_PER_ACTION = 6 # 6
+        self.DIE_FRAME_PER_ACTION = 10 # 4
+        self.RUN_FRAME_PER_ACTION = 8 # 4
 
-        self.x = random.randint(0, 800)
+        self.x = random.randint(0, 2400)
+        self.mx = self.x - 500
+        self.Mx = self.x + 500
         self.y = 90
         self.dir = 1
-        self.frame = 0
+        self.frame = random.randint(1, 3)
         self.face_dir = 1
 
     def update(self):
         prev = self.frame
         if self.die == True:
-            if (self.frame < 8):
+            if (self.frame < 4):
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
             else:
                 game_world.remove_object(self)
         elif self.is_attacking:
-            if (self.frame < 5):
+            if (self.frame < 6):
                 self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
             else:
                 self.is_attacking = False
                 self.face_dir = self.dir
-            if int(prev) < 2 <= int(self.frame):
-                if self.viego:
-                    ball = fireball(self.viego.x, self.viego.y)
-                    game_world.add_object(ball)
         elif self.walk == True:
             self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
-            self.frame = (self.frame + self.RUN_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 6
-            if self.x >= 800:
+            self.frame = (self.frame + self.RUN_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 4
+            if self.x >= self.Mx:
                 self.dir *= -1
                 self.face_dir *= -1
-            elif self.x <= 0:
+            elif self.x <= self.mx:
                 self.dir *= -1
                 self.face_dir *= -1
 
         else:
-            self.frame = (self.frame + self.IDLE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 6
+            self.frame = (self.frame + self.IDLE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 3
 
     def draw(self):
-        f = sheet_list.dark_ghost_idle[min(int(self.frame), 5)]  # 안전하게 인덱스 접근
+        f = sheet_list.yeti_idle[min(int(self.frame), 0)]  # 안전하게 인덱스 접근
         screen_x, screen_y = game_world.render(self, self.x, self.y)  # 카메라 좌표로 변환
 
         if self.die == True:
-            f = sheet_list.dark_ghost_die[int(self.frame)]
+            f = sheet_list.yeti_die[int(self.frame)]
         elif self.is_attacking == True:
-            f = sheet_list.dark_ghost_attack[0][min(int(self.frame), 4)]  # 안전하게 인덱스 접근
+            f = sheet_list.yeti_attack[min(int(self.frame), 3)]  # 안전하게 인덱스 접근
         elif self.walk == True:
-            f = sheet_list.dark_ghost_walk[min(int(self.frame), 5)]  # 안전하게 인덱스 접근
+            f = sheet_list.yeti_walk[min(int(self.frame), 3)]  # 안전하게 인덱스 접근
 
         self.font.draw(screen_x - 70, screen_y + 70, f'(HP : {self.HP:.2f})', (255, 255, 0))
 
         if self.face_dir == -1:  # right
-            Ghost.img.clip_draw(f[0], 949 - f[1] - f[3], f[2], f[3], screen_x, screen_y)
+            Yeti.img.clip_draw(f[0], 1116 - f[1] - f[3], f[2], f[3], screen_x, screen_y)
         else:  # face_dir == -1: # left
-            Ghost.img.clip_composite_draw(
-                f[0], 949 - f[1] - f[3], f[2], f[3], 0, 'h', screen_x,
+            Yeti.img.clip_composite_draw(
+                f[0], 1116 - f[1] - f[3], f[2], f[3], 0, 'h', screen_x,
                 screen_y, f[2], f[3])
 
         # 카메라 오프셋 계산
@@ -270,10 +270,10 @@ class Yeti:
                 self.y + 45)
 
     def get_attack_bb(self):
-        return (self.x - 100,
-                self.y - 100,
-                self.x + 100,
-                self.y + 100)
+        return (self.x - 70,
+                self.y - 30,
+                self.x + 70,
+                self.y + 30)
 
     def handle_collision(self, group, other):
         if group == 'viego:monster':

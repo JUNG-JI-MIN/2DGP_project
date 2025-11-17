@@ -60,6 +60,11 @@ class jump:
                 self.viego.is_jumping = True
                 self.viego.is_jump_holding = True
                 self.viego.on_ground = False
+            elif not self.viego.on_ground and not self.viego.double_jump_used:
+                self.viego.velocity_y = self.viego.min_jump_speed
+                self.viego.is_jumping = True
+                self.viego.is_jump_holding = True
+                self.viego.double_jump_used = True  # 더블점프 사용
 
         # 방향 처리
         if right_down(e):
@@ -165,7 +170,7 @@ class walk:
         pass
 
     def draw(self):
-        f = sheet_list.viego_walk[int(self.viego.frame)]
+        f = sheet_list.viego_walk[min(int(self.viego.frame),4)]
         screen_x, screen_y = game_world.render(self.viego, self.viego.x, self.viego.y)
         if self.viego.face_dir == 1:  # right
             self.viego.img.clip_draw(f[0], 1545 - f[1] - f[3], f[2], f[3], screen_x -25/2 + f[2]/2,screen_y  -45/2 + f[3]/2)
@@ -326,6 +331,7 @@ class Viego:
         self.min_jump_speed = JUMP_HEIGHT_PSS * 1.5
         self.max_jump_speed = JUMP_HEIGHT_PSS * 3
         self.is_jump_holding = False
+        self.double_jump_used = False
 
         # 상태 플러그
         self.is_dashing = False
@@ -353,7 +359,7 @@ class Viego:
                 self.WALK: {right_up: self.IDLE, left_up: self.IDLE, right_down: self.IDLE, left_down: self.IDLE, a_key: self.DASH, s_key_down: self.GUARD, up_down : self.JUMP,z_key_down : self.ATTACK},
                 self.DASH: {a_key_up: self.WALK, right_up: self.IDLE, left_up: self.IDLE, right_down: self.IDLE, left_down: self.IDLE, s_key_down: self.GUARD, up_down : self.JUMP,z_key_down : self.ATTACK},
                 self.GUARD: {s_key_up: self.IDLE,z_key_down : self.ATTACK},
-                self.JUMP: {time_out: self.IDLE,left_down : self.JUMP, right_down : self.JUMP, right_up: self.JUMP, left_up: self.JUMP,up_up : self.JUMP},
+                self.JUMP: {time_out: self.IDLE,left_down : self.JUMP, right_down : self.JUMP, right_up: self.JUMP, left_up: self.JUMP,up_up : self.JUMP, up_down: self.JUMP},
                 self.ATTACK: {time_out : self.IDLE,s_key_down: self.GUARD}
             }
         )
@@ -394,6 +400,7 @@ class Viego:
             self.y = 50
             self.velocity_y = 0
             self.on_ground = True
+            self.double_jump_used = False
             self.is_jumping = False
 
         # 스테이지 전환
@@ -460,6 +467,7 @@ class Viego:
                     self.y = plat_top + 10  # 발 위치 조정
                     self.velocity_y = 0
                     self.on_ground = True
+                    self.double_jump_used = False
                     self.is_jumping = False
                     return
 

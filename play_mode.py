@@ -8,6 +8,8 @@ import stage_loader
 import monster
 import camera
 running = True
+viego = None
+monsters = []
 current_stage = 1
 current_theme = ('village')  #'village' 'forest', 'desert', 'castle', 'snow'
 cam = camera.Camera(2400, 600, 800, 600)
@@ -44,7 +46,7 @@ def init():
     game_world.add_object(viego, 1)
     game_world.set_player(viego)  # 플레이어로 설정
 
-    monsters = [monster.Ghost(viego) for _ in range(3)]
+    monsters = [monster.Ghost(viego) for _ in range(10)]
     game_world.add_objects(monsters, 1)
 
     game_world.add_collision_pair('viego:monster', viego, None)
@@ -71,8 +73,11 @@ def draw():
 
 def change_stage(theme, stage_num):
     """스테이지 전환 함수"""
-    global current_theme, current_stage, soop_back, grass, monsters
+    global current_theme, current_stage, soop_back, grass, monsters, viego
 
+    if viego is None:
+        print ("Viego is not initialized yet.")
+        return  # viego가 아직 초기화되지 않았으면 함수 종료
     current_theme = theme
     current_stage = stage_num
 
@@ -89,3 +94,12 @@ def change_stage(theme, stage_num):
 
     plat = stage_loader.platform(f'background/{theme}_platform.png',theme, stage_num)
     game_world.add_object(plat, 0)
+    if not theme == 'snow':
+        # 몬스터 재로드
+        monsters = [monster.Yeti(viego) for _ in range(10)]
+        game_world.add_objects(monsters, 1)
+
+    game_world.add_collision_pair('viego:monster', viego, None)
+    for m in monsters:
+        game_world.add_collision_pair('viego:monster', None, m)
+    pass

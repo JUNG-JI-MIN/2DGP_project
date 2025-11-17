@@ -13,12 +13,12 @@ def init():
     global image, running
     global viego, back
 
-    image = load_image('background/start.png')
+    image = load_image('background/village.png')
 
     cam = camera.Camera(800, 600, 800, 600)
     game_world.set_camera(cam)
 
-    back = stage_loader.Background('background/start.png')
+    back = stage_loader.Background('background/village.png')
     game_world.add_object(back,0)
 
     viego = Viego()
@@ -36,8 +36,10 @@ def update():
     game_world.update()
     game_world.handle_collision()
     if viego.x > 750:
-        play_mode.change_stage('forest', 1)
+        play_mode.current_theme = 'forest'
+        play_mode.current_stage = 1
         game_framework.change_mode(play_mode)
+
 
 def draw():
     clear_canvas()

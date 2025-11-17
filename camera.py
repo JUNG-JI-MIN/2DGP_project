@@ -19,5 +19,3 @@ class Camera:
     def apply(self, x, y):
         # 월드 좌표를 화면 좌표로 변환
         return x - self.x, y - self.y
-
-camera = Camera(map_width=1600, map_height=1200)  # 맵 크기

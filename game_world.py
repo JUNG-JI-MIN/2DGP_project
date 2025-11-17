@@ -79,6 +79,20 @@ def clear():
     for layer in world:
         layer.clear()
 
+
+def clear_except_player():
+    """플레이어를 제외한 모든 오브젝트 제거"""
+    global player
+
+    for layer in world:
+        # 플레이어가 아닌 객체만 제거
+        layer[:] = [obj for obj in layer if obj == player]
+
+    # 충돌 쌍도 플레이어만 남기고 초기화
+    for pairs in collision_pairs.values():
+        pairs[0][:] = [obj for obj in pairs[0] if obj == player]
+        pairs[1][:] = [obj for obj in pairs[1] if obj == player]
+
 collision_pairs = {}
 def add_collision_pair(group, a, b):
     if group not in collision_pairs:

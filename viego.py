@@ -3,11 +3,13 @@ from pyvisalgo.welzl import min_circle_trivial
 from sdl2 import SDL_KEYDOWN, SDL_KEYUP
 
 import game_world
+import play_mode
 from events import space_down, time_out, a_key, a_key_up, s_key_down, s_key_up, right_down, left_down, right_up, \
     left_up, up_down, up_up, z_key_down
 from state_machine import StateMachine
 import sheet_list
 import game_framework
+import stage_loader
 
 PIXEL_PER_METER = (10.0 / 0.3) # 10 pixel 30 cm.
 WALK_SPEED_KMPH = 10.0 # Km / Hour
@@ -374,6 +376,10 @@ class Viego:
                 self.ste += 5 * game_framework.frame_time
                 if self.ste > self.max_ste:
                     self.ste = self.max_ste
+
+        if self.x >= stage_loader.get_stage_size(play_mode.current_theme, play_mode.current_stage)[0]:
+            play_mode.change_stage(play_mode.current_theme, play_mode.current_stage + 1)
+
         self.state_machine.update()
         if self.mujuck_frame > 0.0:
             self.mujuck_frame -= game_framework.frame_time

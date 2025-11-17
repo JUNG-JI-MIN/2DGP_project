@@ -16,6 +16,13 @@ class Camera:
         self.x = max(0, min(self.x, self.map_width - self.screen_width))
         self.y = max(0, min(self.y, self.map_height - self.screen_height))
 
+    def update_map_size(self, new_map_w, new_map_h):
+        """맵 크기 변경"""
+        self.map_width = new_map_w
+        self.map_height = new_map_h
+        self.x = 0  # 카메라 위치 초기화
+        self.y = 0
+
     def apply(self, x, y):
         # 월드 좌표를 화면 좌표로 변환
         return x - self.x, y - self.y

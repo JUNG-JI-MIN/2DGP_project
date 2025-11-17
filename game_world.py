@@ -1,5 +1,8 @@
 from pico2d import *
+import camera
 world = [[],[],[]]
+camera_instance = None  # 전역 카메라 인스턴스
+player = None  # 플레이어(viego) 참조
 def add_object(o, layer = 0):
     world[layer].append(o)
 def add_objects(ol,layer = 0):
@@ -17,14 +20,34 @@ def remove_object(o):
             remove_collision_object(o)
             return
     raise ValueError("Object not found")
+
+def set_camera(cam):
+    global camera_instance
+    camera_instance = cam
+
+def set_player(p):
+    global player
+    player = p
+
 def update():
+    if camera_instance and player:
+        camera_instance.update(player.x, player.y)
+
     for layer in world:
         for o in layer:
             o.update()
+
+def render(obj, screen_x, screen_y):
+    """카메라 좌표로 자동 변환하여 렌더링"""
+    if camera_instance:
+        return camera_instance.apply(screen_x, screen_y)
+    return screen_x, screen_y
+
 def draw():
     for layer in world:
         for o in layer:
             o.draw()
+
 def collide(a,b):
     left_a, bottom_a, right_a, top_a = a.get_bb()
     left_b, bottom_b, right_b, top_b = b.get_bb()

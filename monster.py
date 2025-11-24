@@ -3,6 +3,7 @@ import random
 import game_framework
 import game_world
 import sheet_list
+import nommor
 PIXEL_PER_METER = (10.0 / 0.3)
 RUN_SPEED_KMPH = 10.0  # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
@@ -40,13 +41,13 @@ class fireball:
         fireball.img.clip_draw(f[0], 949 - f[1] - f[3], f[2], f[3], screen_x, screen_y)
 class Ghost:
     img = None
-    def __init__(self, viego=None):
+    def __init__(self):
         if Ghost.img is None:
             Ghost.img = load_image('monster/dark_ghost.png')
         self.font = load_font('ENCR10B.TTF', 16)
-        self.viego = viego
+        self.viego = nommor.viego
 
-        self.HP = 100
+        self.HP = 1
         self.die = False
         self.is_attacking = False
         self.idle = False
@@ -174,11 +175,11 @@ class Ghost:
 class Yeti:
     img = None
 
-    def __init__(self, viego=None):
+    def __init__(self):
         if Yeti.img is None:
             Yeti.img = load_image('monster/Yeti.png')
         self.font = load_font('ENCR10B.TTF', 16)
-        self.viego = viego
+        self.viego = nommor.viego
 
         self.HP = 100
         self.die = False

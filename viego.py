@@ -25,7 +25,9 @@ TIME_PER_ACTION = 1
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 3
 
-
+class attack_point:
+    def __init__(self):
+        pass
 
 class guard:
     def __init__(self, viego):
@@ -118,7 +120,6 @@ class jump:
             self.viego.img.clip_composite_draw(
                 f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h',
                 screen_x - 25/2 + f[2]/2, screen_y - 45/2 + f[3]/2, f[2], f[3])
-
 class dash:
     def __init__(self, viego):
         self.viego = viego
@@ -219,7 +220,7 @@ class attack:
         else:
             self.count = 0  # 시간이 지나면 첫 번째 공격으로
 
-        self.viego.x += self.viego.face_dir * WALK_SPEED_PPS * game_framework.frame_time * 50
+        self.viego.x += self.viego.face_dir  * 20
 
     def exit(self,e):
         self.viego.is_attacking = False
@@ -256,8 +257,6 @@ class attack:
         else:  # face_dir == -1: # left
             self.viego.img.clip_composite_draw(
                 f[0], 1545 - f[1] - f[3], f[2], f[3], 0, 'h', screen_x, screen_y -45/2 + f[3]/2, f[2], f[3])
-
-
 class Idle:
     def __init__(self, viego):
         self.viego = viego
@@ -379,6 +378,13 @@ class Viego:
         )
 
     def update(self):
+        self.state_machine.update()  # 상태 머신 업데이트
+        self.re_ste() #스테미나 회복
+        self.gravity_()   #중력 처리
+        self.stage_change() # 스테이지 전환 처리
+        self.mujeck_running() # 무적 시간 처리
+
+    def re_ste(self):
         # 스태미나 회복
         if self.ste < self.max_ste:
             if self.is_attacking or self.is_dashing or self.is_guarding:
@@ -387,7 +393,7 @@ class Viego:
                 self.ste += 5 * game_framework.frame_time
                 if self.ste > self.max_ste:
                     self.ste = self.max_ste
-        # 중력 적용 (항상)
+    def gravity_(self):
         if not self.on_ground:
             self.velocity_y += self.gravity * game_framework.frame_time
             self.y += self.velocity_y * game_framework.frame_time
@@ -396,21 +402,30 @@ class Viego:
         self.check_platform_collision()
 
         # 임시 바닥 충돌 (플랫폼 충돌로 교체 예정)
-        if not self.on_ground and self.y <= 50:
-            self.y = 50
-            self.velocity_y = 0
-            self.on_ground = True
-            self.double_jump_used = False
-            self.is_jumping = False
-
+        # if not self.on_ground and self.y <= 50:
+        #     self.y = 50
+        #     self.velocity_y = 0
+        #     self.on_ground = True
+        #     self.double_jump_used = False
+        #     self.is_jumping = False
+    def stage_change(self):
         # 스테이지 전환
+
         if self.x >= stage_loader.get_stage_size(play_mode.current_theme, play_mode.current_stage)[0]:
+            self.x = 50
+            next_theme = stage_loader.get_next_theme(play_mode.current_theme)
             if play_mode.current_stage == stage_loader.get_max_stages(play_mode.current_theme):
-                play_mode.change_stage('snow', 1)
+                play_mode.change_stage(next_theme, 1)
             else:
                 play_mode.change_stage(play_mode.current_theme, play_mode.current_stage + 1)
+        elif self.x < 0:
+            self.x = stage_loader.get_stage_size(play_mode.current_theme, play_mode.current_stage)[0] - 50
+            if play_mode.current_stage == 1:
+                play_mode.change_stage(stage_loader.get_back_theme(play_mode.current_theme), stage_loader.get_max_stages(play_mode.current_theme))
+            else:
+                pass
 
-        self.state_machine.update()
+    def mujeck_running(self):
         if self.mujuck_frame > 0.0:
             self.mujuck_frame -= game_framework.frame_time
             if self.mujuck_frame <= 0.0:
@@ -482,6 +497,7 @@ class Viego:
 
             if self.is_guarding:
                 self.ste -= 5
+                self.x -= 5 * self.face_dir
                 if self.ste < 0:
                     self.ste = 0
                 self.mujuck_frame = self.MUJUCK_TIME
@@ -498,6 +514,8 @@ class Viego:
             pass
     def handle_monster_attack_collision(self,group, other): # 상대 공격이 내게 충돌처리
         if group == 'viego:monster':
+            if self.is_guarding:
+                self.x -= 5 * self.face_dir
             pass
 
     def draw(self):

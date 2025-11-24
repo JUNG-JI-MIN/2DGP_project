@@ -2,7 +2,25 @@ from pico2d import *
 import game_world
 import play_mode
 import game_framework
-
+thema = ('forest', 'snow', 'desert', 'castle')
+def get_next_theme(current_theme):
+    if current_theme == 'forest':
+        return 'snow'
+    elif current_theme == 'snow':
+        return 'desert'
+    elif current_theme == 'desert':
+        return 'castle'
+    else:
+        return 'forest'
+def get_back_theme(current_theme):
+    if current_theme == 'forest':
+        return 'castle'
+    elif current_theme == 'snow':
+        return 'forest'
+    elif current_theme == 'desert':
+        return 'snow'
+    else:
+        return 'desert'
 def get_stage_platform(theme, stage_num):
     #테마와 스테이지 별 발판 위치
     stage_platforms = {
@@ -16,7 +34,8 @@ def get_stage_platform(theme, stage_num):
                 (0, 0, 800, 50),
                 (800, 0, 800, 50),
                 (1600, 0, 800, 50),
-
+                (2400, 0, 800, 50),
+                (2800, 0, 800, 50),
                 # inverted Y platforms
                 (200, 600 - 480 - 40, 220, 40),  # → y=80
                 (600, 600 - 420 - 40, 260, 40),  # → y=140
@@ -35,7 +54,7 @@ def get_stage_platform(theme, stage_num):
                 (800, 0, 800, 50),
                 (1600, 0, 800, 50),
                 (2400, 0, 800, 50),
-
+                (2800, 0, 800, 50),
                 # inverted Y
                 (150, 600 - 480 - 40, 300, 40),  # y=80
                 (700, 600 - 430 - 40, 240, 40),  # y=130
@@ -54,6 +73,7 @@ def get_stage_platform(theme, stage_num):
                 (800, 0, 800, 50),
                 (1600, 0, 800, 50),
                 (2400, 0, 800, 50),
+                (3200, 0, 800, 50),
 
                 # inverted Y
                 (300, 600 - 480 - 40, 260, 40),  # y=80
@@ -79,7 +99,13 @@ def get_stage_platform(theme, stage_num):
             3: [(600, 30, 1000, 60), (400, 120, 600, 60), (800, 180, 500, 60), (500, 300, 400, 60)]
         },
         'snow': {  # 눈 테마 (2개 스테이지)
-            1: [
+            1: [ # 1000 x 3000
+
+                # gound
+                (0, 0, 800, 60),
+                (800, 0, 800, 60),
+
+                # inverted Y
                 (200, 2900, 300, 60),
                 (600, 2750, 250, 60),
                 (100, 2600, 350, 60),
@@ -100,7 +126,13 @@ def get_stage_platform(theme, stage_num):
                 (700, 350, 250, 60),
                 (350, 200, 300, 60),
             ],
-            2: [
+            2: [ # 1500 x 3500
+                # gound
+                (0, 0, 800, 60),
+                (800, 0, 800, 60),
+                (1500, 0, 800, 60),
+
+                # inverted Y
                 (300, 3350, 500, 60),
                 (900, 3200, 450, 60),
                 (150, 3050, 400, 60),
@@ -155,7 +187,7 @@ def get_stage_size(theme, stage_num):
         }
     }
     # 테마가 없으면 기본값, 스테이지가 없으면 해당 테마의 1번
-    return stage_sizes.get(theme, {}).get(stage_num, (2400, 600))
+    return stage_sizes.get(theme, {})[stage_num]
 
 def get_max_stages(theme):
     """테마별 최대 스테이지 수 반환"""

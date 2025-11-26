@@ -401,24 +401,25 @@ class Viego:
         # 플랫폼 충돌 처리
         self.check_platform_collision()
 
-        # 임시 바닥 충돌 (플랫폼 충돌로 교체 예정)
-        # if not self.on_ground and self.y <= 50:
-        #     self.y = 50
-        #     self.velocity_y = 0
-        #     self.on_ground = True
-        #     self.double_jump_used = False
-        #     self.is_jumping = False
+        if play_mode.current_theme == 'village' and self.y <= 50:
+            self.y = 50
+            self.velocity_y = 0
+            self.on_ground = True
+            self.double_jump_used = False
+            self.is_jumping = False
     def stage_change(self):
         # 스테이지 전환
 
         if self.x >= stage_loader.get_stage_size(play_mode.current_theme, play_mode.current_stage)[0]:
             self.x = 50
+            self.y = 100
             next_theme = stage_loader.get_next_theme(play_mode.current_theme)
             if play_mode.current_stage == stage_loader.get_max_stages(play_mode.current_theme):
                 play_mode.change_stage(next_theme, 1)
             else:
                 play_mode.change_stage(play_mode.current_theme, play_mode.current_stage + 1)
         elif self.x < 0:
+            self.y = 100
             self.x = stage_loader.get_stage_size(play_mode.current_theme, play_mode.current_stage)[0] - 50
             if play_mode.current_stage == 1:
                 play_mode.change_stage(stage_loader.get_back_theme(play_mode.current_theme), stage_loader.get_max_stages(play_mode.current_theme))

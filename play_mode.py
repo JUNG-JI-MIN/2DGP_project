@@ -50,8 +50,12 @@ def init():
     game_world.add_objects(monsters, 1)
 
     game_world.add_collision_pair('viego:monster', nommor.viego, None)
+    game_world.add_collision_pair('viego:monster_attack', nommor.viego, None)
+    game_world.add_collision_pair('viego:ground', nommor.viego, None)
+
     for m in monsters:
         game_world.add_collision_pair('viego:monster', None, m)
+        game_world.add_collision_pair('monster:ground', None, m)
     pass
 
 def finish():
@@ -104,6 +108,9 @@ def change_stage(theme, stage_num):
         game_world.add_objects(monsters, 1)
 
     game_world.add_collision_pair('viego:monster', nommor.viego, None)
+    game_world.add_collision_pair('viego:monster_attack', nommor.viego, None)
+    game_world.add_collision_pair('viego:ground', nommor.viego, None)
     for m in monsters:
         game_world.add_collision_pair('viego:monster', None, m)
+        game_world.add_collision_pair('monster:ground', None, m)
     pass

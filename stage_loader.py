@@ -251,7 +251,7 @@ class platform:
             top = screen_y + h // 2
             draw_rectangle(left, bottom, right, top,0,255,0)
 
-    def get_bb_list(self):
+    def get_bb(self):
         bb_list = []
         for x, y, w, h in self.platforms:
             left = x - w // 2

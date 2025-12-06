@@ -62,7 +62,7 @@ class jump:
                 self.viego.is_jumping = True
                 self.viego.is_jump_holding = True
                 self.viego.on_ground = False
-            elif not self.viego.on_ground and not self.viego.double_jump_used:
+            elif not self.viego.on_ground and not self.viego.double_jump_used and self.viego.can_double_jump:
                 self.viego.velocity_y = self.viego.min_jump_speed
                 self.viego.is_jumping = True
                 self.viego.is_jump_holding = True
@@ -349,6 +349,7 @@ class Viego:
         self.is_jumping = False
         self.is_attacking = False
         self.attack_hit_done = False
+        self.can_double_jump = False
         self.mujuck_frame = 0
         self.MUJUCK_TIME = 1  # 무적 지속 시간(초)
 

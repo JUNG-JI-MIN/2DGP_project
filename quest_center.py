@@ -138,7 +138,9 @@ def finish_quest(quest_id):
     reward = quest_list[quest_id]['reward']
     print(f"퀘스트 '{quest_list[quest_id]['name']}' 완료!")
     print(f"보상: exp {reward['exp']}, 돈 {reward['money']}")
-    if reward['double_jump']:
+    nommor.viego.money += reward['money']
+    nommor.viego.cur_exp += reward['exp']
+    if 'double_jump' in reward:
         print("보상: 더블 점프 능력 획득!")
         nommor.viego.can_double_jump = True
 

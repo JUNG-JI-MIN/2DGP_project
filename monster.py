@@ -93,9 +93,12 @@ class Ghost:
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
             else:
                 game_world.remove_object(self)
-                ITEM = item.Item(self.x, self.y- 50, 'ghost')
+                ITEM = item.Item(self.x - 10, self.y- 50, 'ghost')
                 game_world.add_object(ITEM)
                 game_world.add_collision_pair('viego:item', None, ITEM)
+                MONEY = item.Item(self.x + 10, self.y - 50, 'money')
+                game_world.add_object(MONEY)
+                game_world.add_collision_pair('viego:item', None, MONEY)
         elif self.is_attacking:
             if (self.frame <5):
                 self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
@@ -281,9 +284,12 @@ class Yeti:
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
             else:
                 game_world.remove_object(self)
-                ITEM = item.Item(self.x, self.y, 'yeti')
+                ITEM = item.Item(self.x + 10, self.y - 50, 'yeti')
                 game_world.add_object(ITEM)
                 game_world.add_collision_pair('viego:item', None, ITEM)
+                MONEY = item.Item(self.x + 10, self.y - 50, 'money')
+                game_world.add_object(MONEY)
+                game_world.add_collision_pair('viego:item', None, MONEY)
         elif self.is_attacking:
             if (self.frame < 6):
                 self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)

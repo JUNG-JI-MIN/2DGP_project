@@ -107,7 +107,8 @@ class Ghost:
                 if nommor.viego:
                     ball = fireball(nommor.viego.x, nommor.viego.y)
                     game_world.add_object(ball)
-                    game_world.add_collision_pair('viego:monster_attack', None, ball)
+                    game_world.add_collision_pair('viego:ghost_attack', None, ball)
+                    game_world.add_collision_pair('viego:ghost_attack', nommor.viego, None)
         elif self.walk == True:
             self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
             self.frame = (self.frame + self.RUN_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 6
@@ -200,19 +201,51 @@ class Ghost:
                 self.frame = 0
                 self.is_attacking = True
 
-class Yeti_attck:
-    def __init__(self, x,y):
+class Yeti_attack:
+    def __init__(self, x,y, yeti):
+        self.yeti = yeti
         self.x = x
         self.y = y
+        self.ATTACK_FRAME_PER_ACTION = 2
+        self.frame = 0
     def get_bb(self):
         return (self.x - 70,
                 self.y - 30,
                 self.x + 70,
                 self.y + 30)
+    def get_attack_bb(self):
+        return (self.x - 70,
+                self.y - 30,
+                self.x + 70,
+                self.y + 30)
+    def update(self):
+        if (self.frame <5):
+            self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+        else:
+            game_world.remove_object(self)
+        pass
+
+    def draw(self):
+        screen_x, screen_y = game_world.render(self, self.x, self.y)  # 카메라 좌표로 변환
+        offset_x = screen_x - self.x
+        offset_y = screen_y - self.y
+
+        left, bottom, right, top = self.get_attack_bb()
+        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y, 0, 0, 255)
+        pass
 
     def handle_collision(self, group, other):
         if group == 'viego:monster_attack':
+            game_world.remove_collision_object(self)
+            if nommor.viego.HP > 0:
+                nommor.viego.HP -=  self.yeti.int
             pass
+
+    def handle_attack_collision(self, group, other):
+        pass
+    def handle_monster_attack_collision(self,group, other):
+        pass
+
 class Yeti:
     img = None
 
@@ -226,7 +259,7 @@ class Yeti:
         self.is_attacking = False
         self.idle = False
         self.walk = True
-        self.int = 10
+        self.int = 20
 
         self.IDLE_FRAME_PER_ACTION = 1 # 3
         self.ATTACK_FRAME_PER_ACTION = 6 # 6
@@ -254,10 +287,15 @@ class Yeti:
         elif self.is_attacking:
             if (self.frame < 6):
                 self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
-
             else:
                 self.is_attacking = False
                 self.face_dir = self.dir
+            if int(prev) < 2 <= int(self.frame):
+                if nommor.viego:
+                    attack = Yeti_attack(self.x, self.y, self)
+                    game_world.add_object(attack)
+                    game_world.add_collision_pair('viego:monster_attack', None, attack)
+                    game_world.add_collision_pair('viego:monster_attack', nommor.viego, None)
         elif self.walk == True:
             self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
             self.frame = (self.frame + self.RUN_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 4

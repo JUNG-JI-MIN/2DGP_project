@@ -307,6 +307,7 @@ class Viego:
         self.int = 10
         self.dex = 10
         self.level = 1
+        self.cur_exp = 0
         self.need_to_level_up_exp = 100 # 1레벨 기준
 
         # 아이템
@@ -395,6 +396,20 @@ class Viego:
         self.gravity_()   #중력 처리
         self.stage_change() # 스테이지 전환 처리
         self.mujeck_running() # 무적 시간 처리
+        self.exp_update() # 경험치 처리
+
+    def exp_update(self):
+        if self.cur_exp >= self.need_to_level_up_exp:
+            self.level += 1
+            self.cur_exp -= self.need_to_level_up_exp
+            self.need_to_level_up_exp += 300
+            self.max_HP += 50
+            self.max_STE += 50
+            self.HP = self.max_HP
+            self.str += 5
+            self.int += 5
+            self.dex += 5
+            self.ATTACK_SPEED = 0.25 * self.dex
 
     def re_ste(self):
         # 스태미나 회복

@@ -1,4 +1,5 @@
 from pico2d import *
+import quest_center
 import nommor
 
 class UI:
@@ -7,6 +8,8 @@ class UI:
         self.item_chang = False
         self.status_chang = False
         self.armor_chang = False
+        self.quest_chang = False
+        self.quest_tab = 'available'
 
     def update(self):
         pass
@@ -37,9 +40,6 @@ class UI:
         # 레벨 표시
         self.font.draw(10, 500, f'Level: {nommor.viego.level}', (0, 0, 0))
 
-        # 아이템 개수 표시
-        self.font.draw(10, 470, f'meso: {nommor.viego.money}', (0, 0, 0))
-
         # 상태창 (체력창 바로 밑)
         if self.status_chang:
             self.draw_status_window(nommor.viego)
@@ -51,6 +51,10 @@ class UI:
         # 장비창 (화면 중앙)
         if self.armor_chang:
             self.draw_armor_window(nommor.viego)
+        # 퀘스트창 (화면 왼쪽 아래)
+        if self.quest_chang:
+            self.draw_quest_window()
+
     def draw_status_window(self, viego):
         """상태창 - HP/Stamina 바 아래"""
         # 배경
@@ -85,13 +89,6 @@ class UI:
         self.font.draw(495, 420, f'snow Items: {viego.snow_tree_item}', (150, 200, 255))
         self.font.draw(495, 390, f'desert Items: {viego.deser_tree_item}', (200, 150, 255))
 
-        # 퀘스트 정보
-        self.font.draw(660, 570, 'Quests:', (255, 200, 100))
-        y_offset = 410
-        for quest_id, (monster, count) in viego.quest.items():
-            self.font.draw(495, y_offset, f'Quest {quest_id}: {monster} ({count})', (200, 200, 200))
-            y_offset -= 25
-
     def draw_armor_window(self, viego):
         """장비창 - 화면 중앙"""
         # 배경 (400 - 150 = 250부터 시작)
@@ -114,6 +111,76 @@ class UI:
 
         # 닫기 안내
         self.font.draw(255, 270, 'Press E to close', (150, 150, 150))
+
+    def draw_quest_window(self):
+        # 배경 (화면 오른쪽: 490~790, 중간 높이: 200~550)
+        draw_rectangle(490, 100, 790, 550, 40, 40, 40, 1, True)
+        # 테두리
+        draw_rectangle(490, 100, 790, 550, 200, 200, 200)
+
+        # 탭 버튼 (상단에 배치)
+        self.draw_tab_button(490, 545, 'available', self.quest_tab == 'available')
+        self.draw_tab_button(590, 545, 'active', self.quest_tab == 'active')
+        self.draw_tab_button(690, 545, 'completed', self.quest_tab == 'completed')
+
+        # 퀘스트 목록 (탭 아래)
+        if self.quest_tab == 'available':
+            self.draw_available_quests()
+        elif self.quest_tab == 'active':
+            self.draw_active_quests()
+        elif self.quest_tab == 'completed':
+            self.draw_completed_quests()
+
+    def draw_available_quests(self):
+        """받을 수 있는 퀘스트"""
+        y = 500  # 탭 아래부터 시작
+        for qid in quest_center.player_quest['available']:
+            quest = quest_center.quest_list[qid]
+            self.font.draw(500, y, quest['name'], (200, 200, 200))
+            self.font.draw(500, y - 20, quest['description'], (150, 150, 150))
+            y -= 60
+
+    def draw_active_quests(self):
+        """진행 중인 퀘스트 (진행도 바 표시)"""
+        y = 500
+        for qid, current in quest_center.player_quest['active'].items():
+            quest = quest_center.quest_list[qid]
+            required = quest['objective']['count']
+
+            # 퀘스트 이름
+            self.font.draw(500, y, quest['name'], (255, 200, 100))
+
+            # 진행도: 3/5
+            progress = f"{current}/{required}"
+            self.font.draw(500, y - 20, progress, (255, 255, 255))
+
+            # 진행도 바 (250px 기준)
+            bar_width = int(250 * (current / required))
+            draw_rectangle(500, y - 35, 500 + bar_width, y - 30, 0, 255, 0, 1, True)  # 채워진 부분
+            draw_rectangle(500, y - 35, 750, y - 30, 200, 200, 200)  # 외곽선
+
+            y -= 70
+
+    def draw_completed_quests(self):
+        """완료한 퀘스트"""
+        y = 500
+        for qid in quest_center.player_quest['completed']:
+            quest = quest_center.quest_list[qid]
+            self.font.draw(500, y, f"✓ {quest['name']}", (0, 255, 0))
+            y -= 40
+
+    def draw_tab_button(self, x, y, label, selected):
+        """탭 버튼 (선택 시 하이라이트)"""
+        # 배경색 (선택 시 밝게)
+        bg_color = (80, 80, 80) if selected else (40, 40, 40)
+        draw_rectangle(x, y - 30, x + 90, y, bg_color[0], bg_color[1], bg_color[2], 1, True)
+
+        # 테두리
+        color = (255, 255, 0) if selected else (150, 150, 150)
+        draw_rectangle(x, y - 30, x + 90, y, color[0], color[1], color[2])
+
+        # 텍스트
+        self.font.draw(x + 10, y - 20, label, color)
 
     def get_bb(self):
         return (0, 0, 0, 0)  # UI는 충돌 박스가 없음

@@ -191,8 +191,8 @@ class Sleep:
 
     def do(self):
         self.viego.ste += 5 * game_framework.frame_time
-        if self.viego.ste > self.viego.max_ste:
-            self.viego.ste = self.viego.max_ste
+        if self.viego.ste > self.viego.max_STE:
+            self.viego.ste = self.viego.max_STE
         if (self.viego.frame < 6):
             self.viego.frame = (self.viego.frame + self.viego.SLEEP_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
@@ -298,14 +298,15 @@ class Viego:
             Viego.img = load_image('Sprite_Sheets/main_character.png')
         # 스텟
         self.HP = 500
-        self.max_HP = 7
+        self.max_HP = 500
         self.ste = 100
-        self.max_ste = 100
+        self.max_STE = 100
         self.money = 0
 
         self.str = 10
         self.int = 10
         self.dex = 10
+        self.level = 1
 
         # 아이템
         self.ghost_item = 0
@@ -392,13 +393,13 @@ class Viego:
 
     def re_ste(self):
         # 스태미나 회복
-        if self.ste < self.max_ste:
+        if self.ste < self.max_STE:
             if self.is_attacking or self.is_dashing or self.is_guarding:
                 pass
             else:
                 self.ste += 5 * game_framework.frame_time
-                if self.ste > self.max_ste:
-                    self.ste = self.max_ste
+                if self.ste > self.max_STE:
+                    self.ste = self.max_STE
     def gravity_(self):
         if not self.on_ground:
             self.velocity_y += self.gravity * game_framework.frame_time

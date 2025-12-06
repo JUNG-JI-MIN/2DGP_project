@@ -1,5 +1,5 @@
 from pico2d import *
-
+import Bossmonster
 import logo_mode
 from viego import Viego
 import game_world
@@ -11,7 +11,7 @@ import nommor
 running = True
 monsters = []
 current_stage = 1
-current_theme = ('village')  #'village' 'forest', 'desert', 'castle', 'snow'
+current_theme = ('village')  #'village' 'forest', 'desert', 'snow'
 cam = camera.Camera(2400, 600, 800, 600)
 def handle_events():
     global running
@@ -48,6 +48,12 @@ def init():
 
     monsters = [monster.Ghost() for _ in range(4)]
     game_world.add_objects(monsters, 1)
+
+    bosses = [Bossmonster.Wolf() for _ in range(10)]
+    game_world.add_objects(bosses, 1)
+
+    trees = [stage_loader.Tree(f'background/{current_theme}_tree.png',current_theme,current_stage,i) for i in range(stage_loader.get_tree_count(current_theme,current_stage)) ]
+    game_world.add_objects(trees, 0)
 
     game_world.add_collision_pair('viego:item', nommor.viego, None)
     game_world.add_collision_pair('viego:monster', nommor.viego, None)
@@ -108,9 +114,13 @@ def change_stage(theme, stage_num):
         monsters = [monster.Yeti() for _ in range(4)]
         game_world.add_objects(monsters, 1)
 
+    trees = [stage_loader.Tree(f'background/{current_theme}_tree.png', current_theme, current_stage,i) for i in range(stage_loader.get_tree_count(current_theme, current_stage)) ]
+    game_world.add_objects(trees, 0)
+
     game_world.add_collision_pair('viego:monster', nommor.viego, None)
     game_world.add_collision_pair('viego:monster_attack', nommor.viego, None)
     game_world.add_collision_pair('viego:ground', nommor.viego, None)
+
     for m in monsters:
         game_world.add_collision_pair('viego:monster', None, m)
         game_world.add_collision_pair('monster:ground', None, m)

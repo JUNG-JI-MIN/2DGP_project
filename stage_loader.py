@@ -2,6 +2,9 @@ from pico2d import *
 import game_world
 import play_mode
 import game_framework
+
+PIXEL_PER_METER = (10.0 / 0.3)
+
 thema = ('forest', 'snow', 'desert')
 def get_next_theme(current_theme):
     if current_theme == 'forest':
@@ -84,10 +87,89 @@ def get_stage_platform(theme, stage_num):
             ]
         },
         'desert': {  # 사막 테마 (4개 스테이지)
-            1: [(400, 30, 800, 60), (250, 90, 450, 60), (650, 110, 450, 60), (400, 220, 350, 60)],
-            2: [(450, 30, 850, 60), (300, 100, 500, 60), (700, 130, 450, 60), (500, 250, 400, 60)],
-            3: [(500, 30, 900, 60), (350, 110, 550, 60), (750, 150, 500, 60), (600, 280, 450, 60)],
-            4: [(550, 30, 950, 60), (400, 120, 600, 60), (800, 170, 550, 60), (700, 300, 500, 60)]
+            1: [
+                # Ground
+                (0, 0, 800, 50),
+                (800, 0, 800, 50),
+                (1600, 0, 800, 50),
+                (2400, 0, 800, 50),
+
+                # 랜덤 발판 10개
+                (200, 250, 220, 30),
+                (600, 180, 180, 30),
+                (950, 320, 270, 30),
+                (1300, 210, 300, 30),
+                (1500, 380, 190, 30),
+                (1850, 270, 260, 30),
+                (2100, 150, 200, 30),
+                (2400, 340, 180, 30),
+                (2600, 220, 300, 30),
+                (2800, 300, 250, 30),
+            ],
+
+            2: [
+                # Ground
+                (0, 0, 800, 50),
+                (800, 0, 800, 50),
+                (1600, 0, 800, 50),
+                (2400, 0, 800, 50),
+                (3200, 0, 800, 50),
+
+                # 랜덤 발판 10개
+                (180, 240, 200, 30),
+                (500, 180, 260, 30),
+                (900, 300, 180, 30),
+                (1200, 220, 300, 30),
+                (1500, 350, 190, 30),
+                (1800, 260, 250, 30),
+                (2050, 140, 210, 30),
+                (2400, 310, 300, 30),
+                (2700, 200, 180, 30),
+                (3000, 280, 260, 30),
+            ],
+
+            3: [
+                # Ground
+                (0, 0, 800, 50),
+                (800, 0, 800, 50),
+                (1600, 0, 800, 50),
+                (2400, 0, 800, 50),
+                (3200, 0, 800, 50),
+
+                # 랜덤 발판 10개
+                (150, 200, 300, 30),
+                (550, 180, 210, 30),
+                (900, 320, 250, 30),
+                (1250, 270, 290, 30),
+                (1550, 340, 160, 30),
+                (1900, 250, 260, 30),
+                (2150, 150, 200, 30),
+                (2500, 300, 280, 30),
+                (2850, 220, 300, 30),
+                (3200, 310, 180, 30),
+            ],
+
+            4: [
+                # Ground
+                (0, 0, 800, 50),
+                (800, 0, 800, 50),
+                (1600, 0, 800, 50),
+                (2400, 0, 800, 50),
+                (3200, 0, 800, 50),
+                (4000, 0, 800, 50),
+
+                # 랜덤 발판 10개
+                (200, 250, 220, 30),
+                (650, 160, 300, 30),
+                (1050, 300, 200, 30),
+                (1400, 210, 260, 30),
+                (1750, 360, 190, 30),
+                (2100, 270, 300, 30),
+                (2450, 150, 180, 30),
+                (2800, 330, 260, 30),
+                (3200, 210, 300, 30),
+                (3600, 290, 200, 30),
+            ],
         },
         'snow': {  # 눈 테마 (2개 스테이지)
             1: [ # 1000 x 3000
@@ -150,6 +232,26 @@ def get_stage_platform(theme, stage_num):
         }
     }
     return stage_platforms[theme][stage_num]
+def get_stage_tree(theme, stage_num):
+    """테마와 스테이지 번호로 나무 위치 반환"""
+    stage_trees = {
+        'forest': {  # 숲 테마 (3개 스테이지)
+            1: [(1800, 570, 280, 40),(2000, 410, 260, 40),(700, 290, 220, 40),],
+            2: [(1800, 420, 300, 40),(1100, 340, 260, 40),(150, 250, 300, 40),(2500, 610, 260, 40),],
+            3: [(600, 310, 260, 40),(1500, 390, 220, 40),(400, 470, 200, 40),(1700, 580, 280, 40)]
+        },
+        'desert': {  # 사막 테마 (4개 스테이지)
+            1: [(3200, 375, 300, 30),(2450, 315, 180, 30),(1400, 375, 260, 30),(650, 325, 300, 30)],
+            2: [(2500, 465, 280, 30),(1900, 415, 260, 30),(1250, 435, 290, 30),(550, 345, 210, 30)],
+            3: [(2400, 475, 300, 30),(2050, 305, 210, 30),(1200, 385, 300, 30),(180, 405, 200, 30)],
+            4: [(2600, 385, 300, 30),(1850, 435, 260, 30),(950, 485, 270, 30),(200, 415, 220, 30)]
+        },
+        'snow': {  # 눈 테마 (2개 스테이지)
+            1: [(400, 3100,360,320)],
+            2: [(600, 3370,360,320)]
+        }
+    }
+    return stage_trees.get(theme, {}).get(stage_num, [])
 def get_stage_size(theme, stage_num):
     """테마와 스테이지 번호로 맵 크기 반환"""
     stage_sizes = {
@@ -174,7 +276,26 @@ def get_stage_size(theme, stage_num):
     }
     # 테마가 없으면 기본값, 스테이지가 없으면 해당 테마의 1번
     return stage_sizes.get(theme, {})[stage_num]
-
+def get_tree_count(theme, stage):
+    """테마와 스테이지 번호로 나무 개수 반환"""
+    stage_trees = {
+        'forest': {  # 숲 테마 (3개 스테이지)
+            1: 3,
+            2: 4,
+            3: 3
+        },
+        'desert': {  # 사막 테마 (4개 스테이지)
+            1: 4,
+            2: 4,
+            3: 4,
+            4: 4
+        },
+        'snow': {  # 눈 테마 (2개 스테이지)
+            1: 1,
+            2: 1
+        }
+    }
+    return stage_trees.get(theme, {}).get(stage, 0)
 def get_max_stages(theme):
     """테마별 최대 스테이지 수 반환"""
     max_stages = {'forest': 3, 'desert': 4, 'snow': 2}
@@ -196,6 +317,8 @@ class Background:
 
         if self.name == 'background/snow.png':
             draw_rectangle(0, 0, 1500, 3500, 185, 189, 221, 1, True)
+        if self.name == 'background/desert.png':
+            draw_rectangle(0, 0, 4000, 1500, 149, 136, 156, 1, True)
 
         camera_x = play_mode.cam.x
 
@@ -208,14 +331,14 @@ class Background:
             screen_x, screen_y = game_world.render(self, bg_x, self.y)
 
             if i % 2 == 0:
-                self.image.draw(int(screen_x), int(screen_y) + 250)
+                self.image.draw(int(screen_x), int(screen_y) + 250,self.image_width, get_canvas_height() + 250)
             else:
                 self.image.clip_composite_draw(
                     0, 0,
                     self.image_width, self.image.h,
                     0, 'h',
                     int(screen_x), int(screen_y) + 250,
-                    self.image_width, self.image.h
+                    self.image_width, get_canvas_height()+ 250
                 )
 
 
@@ -246,3 +369,31 @@ class platform:
             top = y + h // 2
             bb_list.append((left, bottom, right, top))
         return bb_list
+
+
+class Tree:
+    image = None
+
+    def __init__(self, theme_image, theme, stage, index):
+        if Tree.image is None:
+            Tree.image = load_image(theme_image)
+
+        self.tree = get_stage_tree(theme, stage)
+        self.x, self.y, self.w, self.h = self.tree[index]
+    def update(self):
+        pass
+
+    def draw(self):
+        # 카메라 좌표 변환
+        screen_x, screen_y = game_world.render(self, self.x, self.y)
+
+        # 나무 이미지 그리기 (자신의 크기 사용)
+        Tree.image.draw(screen_x, screen_y, 5 * PIXEL_PER_METER, 5 * PIXEL_PER_METER)
+
+        # 디버그용 바운딩 박스 (선택사항)
+        left = screen_x - 75  # 300 // 2
+        bottom = screen_y - 75
+        right = screen_x + 75
+        top = screen_y + 75
+        draw_rectangle(left, bottom, right, top, 255, 0, 0)
+

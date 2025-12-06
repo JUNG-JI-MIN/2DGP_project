@@ -2,25 +2,21 @@ from pico2d import *
 import game_world
 import play_mode
 import game_framework
-thema = ('forest', 'snow', 'desert', 'castle')
+thema = ('forest', 'snow', 'desert')
 def get_next_theme(current_theme):
     if current_theme == 'forest':
         return 'snow'
     elif current_theme == 'snow':
         return 'desert'
     elif current_theme == 'desert':
-        return 'castle'
-    else:
         return 'forest'
 def get_back_theme(current_theme):
     if current_theme == 'forest':
-        return 'castle'
+        return 'desert'
     elif current_theme == 'snow':
         return 'forest'
     elif current_theme == 'desert':
         return 'snow'
-    else:
-        return 'desert'
 def get_stage_platform(theme, stage_num):
     #테마와 스테이지 별 발판 위치
     stage_platforms = {
@@ -92,11 +88,6 @@ def get_stage_platform(theme, stage_num):
             2: [(450, 30, 850, 60), (300, 100, 500, 60), (700, 130, 450, 60), (500, 250, 400, 60)],
             3: [(500, 30, 900, 60), (350, 110, 550, 60), (750, 150, 500, 60), (600, 280, 450, 60)],
             4: [(550, 30, 950, 60), (400, 120, 600, 60), (800, 170, 550, 60), (700, 300, 500, 60)]
-        },
-        'castle': {  # 성 테마 (3개 스테이지)
-            1: [(400, 30, 800, 60), (200, 80, 400, 60), (600, 100, 400, 60), (400, 200, 300, 60)],
-            2: [(500, 30, 900, 60), (300, 100, 500, 60), (700, 150, 400, 60), (450, 250, 350, 60)],
-            3: [(600, 30, 1000, 60), (400, 120, 600, 60), (800, 180, 500, 60), (500, 300, 400, 60)]
         },
         'snow': {  # 눈 테마 (2개 스테이지)
             1: [ # 1000 x 3000
@@ -176,11 +167,6 @@ def get_stage_size(theme, stage_num):
             3: (3500, 800),
             4: (4000, 800)
         },
-        'castle': {  # 성 테마 (3개 스테이지)
-            1: (3500, 600),
-            2: (4000, 600),
-            3: (4500, 600)
-        },
         'snow': {  # 눈 테마 (2개 스테이지)
             1: (1000, 3000),
             2: (1500, 3500)
@@ -191,7 +177,7 @@ def get_stage_size(theme, stage_num):
 
 def get_max_stages(theme):
     """테마별 최대 스테이지 수 반환"""
-    max_stages = {'forest': 3, 'desert': 4, 'castle': 3, 'snow': 2}
+    max_stages = {'forest': 3, 'desert': 4, 'snow': 2}
     return max_stages.get(theme, 1)
 
 class Background:

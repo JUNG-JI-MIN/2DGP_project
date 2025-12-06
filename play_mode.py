@@ -9,6 +9,7 @@ import monster
 import camera
 import nommor
 import UI
+import quest_center
 running = True
 monsters = []
 current_stage = 1
@@ -18,14 +19,40 @@ def handle_events():
     global running
     events = get_events()
     for event in events:
+        if event.type == SDL_MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = event.x, 600 - event.y
+            # 퀘스트 창이 열려있을 때만
+            if nommor.UI.quest_chang:
+                # 탭 클릭 (상단: y=545~515, x=490/590/690)
+                if 490 <= mouse_x <= 580 and 515 <= mouse_y <= 545:
+                    nommor.UI.quest_tab = 'available'
+                elif 590 <= mouse_x <= 680 and 515 <= mouse_y <= 545:
+                    nommor.UI.quest_tab = 'active'
+                elif 690 <= mouse_x <= 780 and 515 <= mouse_y <= 545:
+                    nommor.UI.quest_tab = 'completed'
+
+                # 퀘스트 클릭 (available 탭에서만)
+                if nommor.UI.quest_tab == 'available':
+                    # 퀘스트 목록 영역: x=490~790, y=500부터 60px 간격
+                    if 490 <= mouse_x <= 790 and 200 <= mouse_y <= 500:
+                        index = (500 - mouse_y) // 60
+                        if 0 <= index < len(quest_center.player_quest['available']):
+                            qid = quest_center.player_quest['available'][index]
+                            quest_center.start_quest(qid)
         if event.type == SDL_QUIT:
             game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
-            if (nommor.UI.status_chang == False and nommor.UI.item_chang == False):
+            if (nommor.UI.status_chang == False and
+                    nommor.UI.item_chang == False and
+                    nommor.UI.armor_chang == False and
+                    nommor.UI.quest_chang == False):
+
                 game_framework.quit()
-            else :
+            else:
+                nommor.UI.quest_chang = False
                 nommor.UI.status_chang = False
                 nommor.UI.item_chang = False
+                nommor.UI.armor_chang = False
                 # UI 토글
         elif event.type == SDL_KEYDOWN and event.key == 105:  # i: 아이템창 (ASCII 105)
             nommor.UI.item_chang = not nommor.UI.item_chang
@@ -33,6 +60,8 @@ def handle_events():
             nommor.UI.status_chang = not nommor.UI.status_chang
         elif event.type == SDL_KEYDOWN and event.key == 101:  # e: 장비창 (ASCII 101)
             nommor.UI.armor_chang = not nommor.UI.armor_chang
+        elif event.type == SDL_KEYDOWN and event.key == 113:  # q: 퀘스트창 (ASCII 113)
+            nommor.UI.quest_chang = not nommor.UI.quest_chang
         else:
             nommor.viego.handle_event(event)
 

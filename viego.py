@@ -25,9 +25,54 @@ TIME_PER_ACTION = 1
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 3
 
-class attack_point:
-    def __init__(self):
+
+class thunder:
+    image = None
+    index = 0
+    def __init__(self, viego, direction, x, y, count=1,max_count=5):
+        if thunder.image is None:
+            thunder.image = load_image('Sprite_Sheets/thunder.png')
+        self.viego = viego
+        self.frame = 0
+        self.dir = direction
+        self.max_count = max_count
+        self.x, self.y = x, y
+        self.count = count
+    def update(self):
+        if self.frame < 14:
+            self.frame = (self.frame + 16 * ACTION_PER_TIME * game_framework.frame_time)
+        else:
+            if self.count < self.max_count:
+                print( f'{self.count=} ,{self.max_count=}')
+                T = thunder(self.viego,self.dir, self.x + self.max_count * 60 * self.dir, self.y, self.count +1,self.max_count)
+                game_world.add_object(T, 1)
+                game_world.add_collision_pair('viego_thunder:monster', T, None)
+
+            game_world.remove_object(self)
+
+    def draw(self):
+        f = sheet_list.viego_thunder_attack[int(self.frame)]
+        screen_x, screen_y = game_world.render(self.viego, self.x, self.y)
+        thunder.image.clip_draw(f[0], 1240 - f[1] - f[3], f[2], f[3], screen_x, screen_y,500,800)
         pass
+
+    def get_bb(self):
+        return (self.viego.x - 15,
+                self.viego.y - 15,
+                self.viego.x + 15,
+                self.viego.y + 15)
+    def get_attack_bb(self):
+        return (self.viego.x - 20,
+                self.viego.y - 20,
+                self.viego.x + 20,
+                self.viego.y + 20)
+    def handle_collision(self, group, other):
+        pass
+    def handle_attack_collision(self, group, other):
+        pass
+    def handle_monster_attack_collision(self,group, other):
+        pass
+
 
 class guard:
     def __init__(self, viego):
@@ -35,7 +80,9 @@ class guard:
 
     def enter(self,e):
         self.viego.is_guarding = True
-
+        T = thunder(self.viego, self.viego.face_dir, self.viego.x + self.viego.face_dir * 50, 400, 0,self.viego.int //5 )
+        game_world.add_object(T, 1)
+        game_world.add_collision_pair('viego_thunder:monster', T, None)
     def exit(self,e):
         self.viego.frame = 0
         self.viego.is_guarding = False

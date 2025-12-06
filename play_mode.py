@@ -39,6 +39,10 @@ def init():
     back = stage_loader.Background(f'background/{current_theme}.png')
     game_world.add_object(back,0)
 
+    trees = [stage_loader.Tree(f'background/{current_theme}_tree.png', current_theme, current_stage, i) for i in
+             range(stage_loader.get_tree_count(current_theme, current_stage))]
+    game_world.add_objects(trees, 0)
+
     plat = stage_loader.platform(f'background/{current_theme}_platform.png',current_theme,current_stage)
     game_world.add_object(plat,0)
 
@@ -51,9 +55,6 @@ def init():
 
     bosses = [Bossmonster.Wolf() for _ in range(10)]
     game_world.add_objects(bosses, 1)
-
-    trees = [stage_loader.Tree(f'background/{current_theme}_tree.png',current_theme,current_stage,i) for i in range(stage_loader.get_tree_count(current_theme,current_stage)) ]
-    game_world.add_objects(trees, 0)
 
     game_world.add_collision_pair('viego:item', nommor.viego, None)
     game_world.add_collision_pair('viego:monster', nommor.viego, None)
@@ -105,6 +106,9 @@ def change_stage(theme, stage_num):
         nommor.viego = Viego()
     game_world.add_object(nommor.viego, 1)
 
+    trees = [stage_loader.Tree(f'background/{current_theme}_tree.png', current_theme, current_stage, i) for i in
+             range(stage_loader.get_tree_count(current_theme, current_stage))]
+    game_world.add_objects(trees, 0)
 
     # 발판 재로드
     plat = stage_loader.platform(f'background/{theme}_platform.png',theme, stage_num)
@@ -113,9 +117,6 @@ def change_stage(theme, stage_num):
         # 몬스터 재로드
         monsters = [monster.Yeti() for _ in range(4)]
         game_world.add_objects(monsters, 1)
-
-    trees = [stage_loader.Tree(f'background/{current_theme}_tree.png', current_theme, current_stage,i) for i in range(stage_loader.get_tree_count(current_theme, current_stage)) ]
-    game_world.add_objects(trees, 0)
 
     game_world.add_collision_pair('viego:monster', nommor.viego, None)
     game_world.add_collision_pair('viego:monster_attack', nommor.viego, None)

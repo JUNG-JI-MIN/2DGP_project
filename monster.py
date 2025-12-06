@@ -5,6 +5,7 @@ import game_world
 import sheet_list
 import nommor
 import item
+import quest_center
 PIXEL_PER_METER = (10.0 / 0.3)
 RUN_SPEED_KMPH = 10.0  # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
@@ -136,6 +137,7 @@ class Ghost:
             if (self.frame <8):
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
             else:
+                quest_center.update_quest('ghost')
                 game_world.remove_object(self)
                 ITEM = item.Item(self.x - 10, self.y- 50, 'ghost')
                 game_world.add_object(ITEM)
@@ -335,6 +337,7 @@ class Yeti:
             if (self.frame < 4):
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
             else:
+                quest_center.update_quest('yeti')
                 game_world.remove_object(self)
                 ITEM = item.Item(self.x + 10, self.y - 50, 'yeti')
                 game_world.add_object(ITEM)

@@ -4,6 +4,7 @@ import nommor
 import play_mode
 import item
 import game_framework
+import quest_center
 
 PIXEL_PER_METER = (10.0 / 0.3)
 
@@ -456,6 +457,7 @@ class Tree:
                 nommor.viego.attack_hit_done = True
                 self.hp -= 1
                 if self.hp <= 0:
+                    quest_center.update_quest(f'{self.thema}_tree')
                     game_world.remove_object(self)
                     ITEM = item.Item(self.x + 10, self.y - 50, f'{self.thema}_tree')
                     ITEM.value = 500

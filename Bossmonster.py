@@ -2,6 +2,7 @@ from pico2d import *
 import random
 import game_framework
 import game_world
+import quest_center
 import sheet_list
 import nommor
 import item
@@ -91,6 +92,7 @@ class Wolf:
             if (self.frame <5):
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
             else:
+                quest_center.update_quest('ghost')
                 game_world.remove_object(self)
                 ITEM = item.Item(self.x, self.y- 50, 'wolf')
                 game_world.add_object(ITEM)

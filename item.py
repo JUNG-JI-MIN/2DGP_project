@@ -4,16 +4,15 @@ import nommor
 
 
 class Item:
-    image = None
 
     def __init__(self, x, y,type):
-        if Item.image is None:
-            Item.image = pico2d.load_image(f'monster/{type}_item.png')
+        self.image = pico2d.load_image(f'item/{type}_item.png')
         self.type = type
         self.x = x
         self.y = y
-        self.width = Item.image.w
-        self.height = Item.image.h
+        self.width = self.image.w
+        self.height = self.image.h
+        self.value = 0
 
     def get_bb(self):
         return (self.x - self.width // 2, self.y - self.height // 2,
@@ -28,7 +27,7 @@ class Item:
     # 의미 없음
     def draw(self):
         screen_x, screen_y = game_world.render(self, self.x, self.y)
-        Item.image.draw(screen_x, screen_y)
+        self.image.draw(screen_x, screen_y)
 
     def handle_collision(self, group, other):
         if group == "viego:item":

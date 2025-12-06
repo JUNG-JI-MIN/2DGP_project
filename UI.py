@@ -42,20 +42,20 @@ class UI:
 
         # 상태창 (체력창 바로 밑)
         if self.status_chang:
-            self.draw_status_window(nommor.viego)
+            self.draw_status_window()
 
         # 아이템창 (화면 오른쪽)
         if self.item_chang:
-            self.draw_item_window(nommor.viego)
+            self.draw_item_window()
 
         # 장비창 (화면 중앙)
         if self.armor_chang:
-            self.draw_armor_window(nommor.viego)
+            self.draw_armor_window()
         # 퀘스트창 (화면 왼쪽 아래)
         if self.quest_chang:
             self.draw_quest_window()
 
-    def draw_status_window(self, viego):
+    def draw_status_window(self):
         """상태창 - HP/Stamina 바 아래"""
         # 배경
         draw_rectangle(10, 350, 310, 490, 40, 40, 40, 1, True)
@@ -66,12 +66,12 @@ class UI:
         self.font.draw(15, 470, 'Status', (255, 255, 0))
 
         # 스탯 정보
-        self.font.draw(15, 445, f'STR: {viego.str}', (255, 255, 255))
-        self.font.draw(15, 420, f'INT: {viego.int}', (255, 255, 255))
-        self.font.draw(15, 395, f'DEX: {viego.dex}', (255, 255, 255))
-        self.font.draw(15, 370, f'Money: {viego.money}', (255, 255, 0))
+        self.font.draw(15, 445, f'STR: {nommor.viego.str}', (255, 255, 255))
+        self.font.draw(15, 420, f'INT: {nommor.viego.int}', (255, 255, 255))
+        self.font.draw(15, 395, f'DEX: {nommor.viego.dex}', (255, 255, 255))
+        self.font.draw(15, 370, f'Money: {nommor.viego.money}', (255, 255, 0))
 
-    def draw_item_window(self, viego):
+    def draw_item_window(self):
         """아이템창 - 화면 오른쪽"""
         # 배경 (800 - 310 = 490부터 시작)
         draw_rectangle(490, 350, 790, 590, 40, 40, 40, 1, True)
@@ -82,14 +82,14 @@ class UI:
         self.font.draw(495, 570, 'Items', (255, 255, 0))
 
         # 아이템 목록
-        self.font.draw(495, 540, f'Ghost Items: {viego.ghost_item}', (150, 150, 255))
-        self.font.draw(495, 510, f'Yeti Items: {viego.yeti_item}', (150, 200, 255))
-        self.font.draw(495, 480, f'Wolf Items: {viego.wolf_item}', (200, 150, 255))
-        self.font.draw(495, 450, f'forest Items: {viego.forest_tree_item}', (150, 150, 255))
-        self.font.draw(495, 420, f'snow Items: {viego.snow_tree_item}', (150, 200, 255))
-        self.font.draw(495, 390, f'desert Items: {viego.deser_tree_item}', (200, 150, 255))
+        self.font.draw(495, 540, f'Ghost Items: {nommor.viego.ghost_item}', (150, 150, 255))
+        self.font.draw(495, 510, f'Yeti Items: {nommor.viego.yeti_item}', (150, 200, 255))
+        self.font.draw(495, 480, f'Wolf Items: {nommor.viego.wolf_item}', (200, 150, 255))
+        self.font.draw(495, 450, f'forest Items: {nommor.viego.forest_tree_item}', (150, 150, 255))
+        self.font.draw(495, 420, f'snow Items: {nommor.viego.snow_tree_item}', (150, 200, 255))
+        self.font.draw(495, 390, f'desert Items: {nommor.viego.deser_tree_item}', (200, 150, 255))
 
-    def draw_armor_window(self, viego):
+    def draw_armor_window(self):
         """장비창 - 화면 중앙"""
         # 배경 (400 - 150 = 250부터 시작)
         draw_rectangle(250, 250, 550, 550, 40, 40, 40, 1, True)

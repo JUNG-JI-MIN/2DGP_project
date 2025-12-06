@@ -455,7 +455,7 @@ class Tree:
         if group == 'viego:tree':
             if nommor.viego.is_attacking and not nommor.viego.attack_hit_done:
                 nommor.viego.attack_hit_done = True
-                self.hp -= 1
+                self.hp -= 5
                 if self.hp <= 0:
                     quest_center.update_quest(f'{self.thema}_tree')
                     game_world.remove_object(self)
@@ -463,6 +463,12 @@ class Tree:
                     ITEM.value = 500
                     game_world.add_object(ITEM)
                     game_world.add_collision_pair('viego:item', None, ITEM)
+                    if self.thema == 'forest':
+                        nommor.viego.forest_tree_item += 1
+                    elif self.thema == 'desert':
+                        nommor.viego.desert_tree_item += 1
+                    elif self.thema == 'snow':
+                        nommor.viego.snow_tree_item += 1
 
     def handle_monster_attack_collision(self, group, other):
         pass

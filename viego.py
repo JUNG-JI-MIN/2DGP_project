@@ -297,7 +297,7 @@ class Viego:
         if Viego.img is None:
             Viego.img = load_image('Sprite_Sheets/main_character.png')
         # 스텟
-        self.HP = 5
+        self.HP = 500
         self.max_HP = 7
         self.ste = 100
         self.max_ste = 100
@@ -521,10 +521,15 @@ class Viego:
         if group == 'viego:monster':
             pass
     def handle_monster_attack_collision(self,group, other): # 상대 공격이 내게 충돌처리
-        if group == 'viego:monster':
-            if self.is_guarding:
+        if group == 'viego:ghost_attack':
+            if self.is_guarding and self.mujuck_frame <= 0.0:
                 self.x -= 5 * self.face_dir
-            pass
+        if group == 'viego:yeti_attack':
+            if self.is_guarding and self.mujuck_frame <= 0.0:
+                self.x -= 5 * self.face_dir
+        if group == 'viego:wolf_attack':
+            if self.is_guarding and self.mujuck_frame <= 0.0:
+                self.x -= 5 * self.face_dir
 
     def draw(self):
         self.state_machine.draw()

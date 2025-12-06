@@ -306,6 +306,11 @@ class Viego:
         self.int = 10
         self.dex = 10
 
+        # 아이템
+        self.ghost_item = 0
+        self.yeti_item = 0
+        self.wolf_item = 0
+
         # 각 프레임 별 속도 설정
         self.IDLE_FRAME_PER_ACTION  = 3
         self.SLEEP_FRAME_PER_ACTION = 7
@@ -492,6 +497,8 @@ class Viego:
             self.on_ground = False
 
     def handle_collision(self, group, other): # 몸통 충돌 처리
+
+
         if group == 'viego:monster':
             if self.mujuck_frame > 0.0:
                 return

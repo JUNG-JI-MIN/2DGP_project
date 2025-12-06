@@ -4,6 +4,7 @@ import game_framework
 import game_world
 import sheet_list
 import nommor
+import item
 PIXEL_PER_METER = (10.0 / 0.3)
 RUN_SPEED_KMPH = 10.0  # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
@@ -92,6 +93,9 @@ class Ghost:
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
             else:
                 game_world.remove_object(self)
+                ITEM = item.Item(self.x, self.y- 50, 'ghost')
+                game_world.add_object(ITEM)
+                game_world.add_collision_pair('viego:item', None, ITEM)
         elif self.is_attacking:
             if (self.frame <5):
                 self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
@@ -244,6 +248,9 @@ class Yeti:
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
             else:
                 game_world.remove_object(self)
+                ITEM = item.Item(self.x, self.y, 'yeti')
+                game_world.add_object(ITEM)
+                game_world.add_collision_pair('viego:item', None, ITEM)
         elif self.is_attacking:
             if (self.frame < 6):
                 self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)

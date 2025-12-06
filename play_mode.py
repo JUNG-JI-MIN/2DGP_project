@@ -49,6 +49,7 @@ def init():
     monsters = [monster.Ghost() for _ in range(4)]
     game_world.add_objects(monsters, 1)
 
+    game_world.add_collision_pair('viego:item', nommor.viego, None)
     game_world.add_collision_pair('viego:monster', nommor.viego, None)
     game_world.add_collision_pair('viego:monster_attack', nommor.viego, None)
     game_world.add_collision_pair('viego:ground', nommor.viego, None)

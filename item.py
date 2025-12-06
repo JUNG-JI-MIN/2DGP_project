@@ -1,5 +1,6 @@
 import pico2d
 import game_world
+import nommor
 
 
 class Item:
@@ -8,6 +9,7 @@ class Item:
     def __init__(self, x, y,type):
         if Item.image is None:
             Item.image = pico2d.load_image(f'monster/{type}_item.png')
+        self.type = type
         self.x = x
         self.y = y
         self.width = Item.image.w
@@ -30,9 +32,14 @@ class Item:
 
     def handle_collision(self, group, other):
         if group == "viego:item":
-            for a in game_world.collision_pairs['viego:item'][1]:
-                if a == self:
-                    game_world.collision_pairs['viego:monster'][1].remove(a)
+            game_world.remove_object(self)
+
+            if self.type == "ghost":
+                nommor.viego.ghost_item += 1
+            if self.type == "yeti":
+                nommor.viego.yeti_item += 1
+            if self.type == "wolf":
+                nommor.viego.wolf_item += 1
             pass
 
 

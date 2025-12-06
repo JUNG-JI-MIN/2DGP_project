@@ -2,6 +2,7 @@ from pico2d import *
 import game_world
 import nommor
 import play_mode
+import item
 import game_framework
 
 PIXEL_PER_METER = (10.0 / 0.3)
@@ -413,6 +414,7 @@ class Tree:
     def __init__(self, theme_image, theme, stage, index):
         self.image = load_image(theme_image)
         self.tree = get_stage_tree(theme, stage)
+        self.thema = theme
 
         self.x, self.y, self.w, self.h = self.tree[index]
 
@@ -455,5 +457,10 @@ class Tree:
                 self.hp -= 1
                 if self.hp <= 0:
                     game_world.remove_object(self)
+                    ITEM = item.Item(self.x + 10, self.y - 50, f'{self.thema}_tree')
+                    ITEM.value = 500
+                    game_world.add_object(ITEM)
+                    game_world.add_collision_pair('viego:item', None, ITEM)
+
     def handle_monster_attack_collision(self, group, other):
         pass

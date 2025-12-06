@@ -3,6 +3,7 @@ import random
 import game_framework
 import game_world
 import sheet_list
+import item
 PIXEL_PER_METER = (10.0 / 0.3)
 RUN_SPEED_KMPH = 10.0  # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
@@ -46,7 +47,7 @@ class Ghost:
         self.font = load_font('ENCR10B.TTF', 16)
         self.viego = viego
 
-        self.HP = 100
+        self.HP = 1
         self.die = False
         self.is_attacking = False
         self.idle = False
@@ -74,6 +75,9 @@ class Ghost:
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
             else:
                 game_world.remove_object(self)
+                ITEM = item.Item(self.x, self.y - 50, 'ghost')
+                game_world.add_object(ITEM)
+                game_world.add_collision_pair('viego:item', None, ITEM)
         elif self.is_attacking:
             if (self.frame <5):
                 self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
@@ -157,9 +161,11 @@ class Ghost:
                 if self.HP <= 0:
                     self.die = True
                     self.frame = 0
+
                     for a in game_world.collision_pairs['viego:monster'][1]:
                         if a == self:
                             game_world.collision_pairs['viego:monster'][1].remove(a)
+
 
     def handle_monster_attack_collision(self,group, other):
         if group == 'viego:monster':
@@ -207,6 +213,9 @@ class Yeti:
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
             else:
                 game_world.remove_object(self)
+                ITEM = item.Item(self.x, self.y, 'ghost')
+                game_world.add_object(ITEM)
+                game_world.add_collision_pair('viego:item', None, ITEM)
         elif self.is_attacking:
             if (self.frame < 6):
                 self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
@@ -287,9 +296,11 @@ class Yeti:
                 if self.HP <= 0:
                     self.die = True
                     self.frame = 0
+
                     for a in game_world.collision_pairs['viego:monster'][1]:
                         if a == self:
                             game_world.collision_pairs['viego:monster'][1].remove(a)
+
 
     def handle_monster_attack_collision(self, group, other):
         if group == 'viego:monster':

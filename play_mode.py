@@ -99,6 +99,7 @@ def change_stage(theme, stage_num):
         monsters = [monster.Yeti(viego) for _ in range(10)]
         game_world.add_objects(monsters, 1)
 
+    game_world.add_collision_pair('viego:item', viego, None)
     game_world.add_collision_pair('viego:monster', viego, None)
     for m in monsters:
         game_world.add_collision_pair('viego:monster', None, m)

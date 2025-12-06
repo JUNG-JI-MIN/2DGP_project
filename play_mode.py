@@ -56,15 +56,19 @@ def init():
     bosses = [Bossmonster.Wolf() for _ in range(10)]
     game_world.add_objects(bosses, 1)
 
+
     game_world.add_collision_pair('viego:item', nommor.viego, None)
     game_world.add_collision_pair('viego:monster', nommor.viego, None)
     game_world.add_collision_pair('viego:monster_attack', nommor.viego, None)
     game_world.add_collision_pair('viego:ground', nommor.viego, None)
+    game_world.add_collision_pair('viego:tree', nommor.viego, None)
+
+    for t in trees:
+        game_world.add_collision_pair('viego:tree', None, t)
 
     for m in monsters:
         game_world.add_collision_pair('viego:monster', None, m)
         game_world.add_collision_pair('monster:ground', None, m)
-    pass
 
 def finish():
     game_world.clear()
@@ -121,6 +125,10 @@ def change_stage(theme, stage_num):
     game_world.add_collision_pair('viego:monster', nommor.viego, None)
     game_world.add_collision_pair('viego:monster_attack', nommor.viego, None)
     game_world.add_collision_pair('viego:ground', nommor.viego, None)
+
+    for t in trees:
+        game_world.add_collision_pair('viego:tree', None, t)
+    pass
 
     for m in monsters:
         game_world.add_collision_pair('viego:monster', None, m)

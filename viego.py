@@ -12,7 +12,7 @@ import game_framework
 import stage_loader
 
 PIXEL_PER_METER = (10.0 / 0.3) # 10 pixel 30 cm.
-WALK_SPEED_KMPH = 10.0 # Km / Hour
+WALK_SPEED_KMPH = 100.0 # Km / Hour
 WALK_SPEED_MPM = (WALK_SPEED_KMPH * 1000.0 / 60.0) # Meter / Minute
 WALK_SPEED_MPS = (WALK_SPEED_MPM / 60.0) # Meter / Second
 WALK_SPEED_PPS = (WALK_SPEED_MPS * PIXEL_PER_METER) # 초당 픽셀 이동 거리 (Pixel Per Second)

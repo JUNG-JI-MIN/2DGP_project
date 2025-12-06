@@ -4,6 +4,7 @@ import play_mode
 import game_world
 import stage_loader
 import camera
+import Bossmonster
 import events
 from viego import Viego
 
@@ -26,6 +27,8 @@ def init():
     viego.y = 100
     game_world.add_object(viego, 1)
     game_world.set_player(viego)  # 플레이어로 설정
+
+
 
     game_world.add_collision_pair('viego:portal', viego, None)
     game_world.add_collision_pair('viego:training', viego, None)

@@ -111,24 +111,24 @@ def add_collision_pair(group, a, b):
 
 def handle_collision():
     for group, pairs in collision_pairs.items():
-        for a in pairs[0]:
-            for b in pairs[1]:
+        for a in pairs[0][:]:  # 복사본
+            for b in pairs[1][:]:  # 복사본
                 if collide(a,b):
                     a.handle_collision(group, b)
                     b.handle_collision(group, a)
 
 def handle_attack_collision():
     for group, pairs in collision_pairs.items():
-        for a in pairs[0]:
-            for b in pairs[1]:
+        for a in pairs[0][:]:  # 복사본
+            for b in pairs[1][:]:  # 복사본
                 if attack_collide(a,b):
                     a.handle_attack_collision(group, b)
                     b.handle_attack_collision(group, a)
 
 def handle_monster_attack_collision():
     for group, pairs in collision_pairs.items():
-        for a in pairs[0]:
-            for b in pairs[1]:
+        for a in pairs[0][:]:  # 복사본
+            for b in pairs[1][:]:  # 복사본
                 if monster_attack_collide(a,b):
                     a.handle_monster_attack_collision(group, b)
                     b.handle_monster_attack_collision(group, a)

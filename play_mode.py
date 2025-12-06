@@ -8,6 +8,7 @@ import stage_loader
 import monster
 import camera
 import nommor
+import UI
 running = True
 monsters = []
 current_stage = 1
@@ -31,6 +32,7 @@ def init():
     global soop_back, grass, cam
     global current_stage,current_theme
 
+
     # 스테이지 크기에 맞게 카메라 생성
     map_width, map_height = stage_loader.get_stage_size(current_theme, current_stage)
     cam = camera.Camera(map_width, map_height, 800, 600)
@@ -46,9 +48,15 @@ def init():
     plat = stage_loader.platform(f'background/{current_theme}_platform.png',current_theme,current_stage)
     game_world.add_object(plat,0)
 
-    nommor.viego = Viego()
+    if nommor.viego == None:
+        nommor.viego = Viego()
     game_world.add_object(nommor.viego, 1)
     game_world.set_player(nommor.viego)  # 플레이어로 설정
+
+    # ui 초기화
+    if nommor.UI is None:
+        nommor.UI = UI.UI()
+    game_world.add_object(nommor.UI, 2)
 
     monsters = [monster.Ghost() for _ in range(4)]
     game_world.add_objects(monsters, 1)
@@ -110,6 +118,11 @@ def change_stage(theme, stage_num):
         nommor.viego = Viego()
     game_world.add_object(nommor.viego, 1)
 
+    # 0. ui 초기화
+    if nommor.UI is None:
+        nommor.UI = UI.UI()
+    game_world.add_object(nommor.UI, 2)
+
     trees = [stage_loader.Tree(f'background/{current_theme}_tree.png', current_theme, current_stage, i) for i in
              range(stage_loader.get_tree_count(current_theme, current_stage))]
     game_world.add_objects(trees, 0)
@@ -133,3 +146,6 @@ def change_stage(theme, stage_num):
         game_world.add_collision_pair('viego:monster', None, m)
         game_world.add_collision_pair('monster:ground', None, m)
     pass
+
+
+

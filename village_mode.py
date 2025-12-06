@@ -64,10 +64,20 @@ def handle_events():
     for event in events:
         if event.type == SDL_QUIT:
             game_framework.quit()
-        elif event.type == SDL_KEYDOWN:  # 아무 키나 누르면
-            if event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
+            if (nommor.UI.status_chang == False and nommor.UI.item_chang == False):
                 game_framework.quit()
-            elif event.key == SDLK_RETURN:
-                game_framework.change_mode(play_mode)
+            else :
+                nommor.UI.status_chang = False
+                nommor.UI.item_chang = False
+                # UI 토글
+        elif event.type == SDL_KEYDOWN and event.key == 105:  # i: 아이템창 (ASCII 105)
+            nommor.UI.item_chang = not nommor.UI.item_chang
+        elif event.type == SDL_KEYDOWN and event.key == 99:  # c: 상태창 (ASCII 99)
+            nommor.UI.status_chang = not nommor.UI.status_chang
+        elif event.type == SDL_KEYDOWN and event.key == 101:  # e: 장비창 (ASCII 101)
+            nommor.UI.armor_chang = not nommor.UI.armor_chang
+        else:
+            nommor.viego.handle_event(event)
 
         nommor.viego.handle_event(event)

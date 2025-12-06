@@ -307,11 +307,15 @@ class Viego:
         self.int = 10
         self.dex = 10
         self.level = 1
+        self.need_to_level_up_exp = 100 # 1레벨 기준
 
         # 아이템
         self.ghost_item = 0
         self.yeti_item = 0
         self.wolf_item = 0
+        self.forest_tree_item = 0
+        self.deser_tree_item = 0
+        self.snow_tree_item = 0
 
         # 각 프레임 별 속도 설정
         self.IDLE_FRAME_PER_ACTION  = 3

@@ -301,6 +301,7 @@ class Viego:
         self.max_HP = 7
         self.ste = 100
         self.max_ste = 100
+        self.money = 0
 
         self.str = 10
         self.int = 10
@@ -425,11 +426,15 @@ class Viego:
                 play_mode.change_stage(play_mode.current_theme, play_mode.current_stage + 1)
         elif self.x < 0:
             self.y = 100
-            self.x = stage_loader.get_stage_size(play_mode.current_theme, play_mode.current_stage)[0] - 50
+            prev_theme = stage_loader.get_back_theme(play_mode.current_theme)
             if play_mode.current_stage == 1:
-                play_mode.change_stage(stage_loader.get_back_theme(play_mode.current_theme), stage_loader.get_max_stages(play_mode.current_theme))
+                # 이전 테마의 마지막 스테이지로
+                prev_stage = stage_loader.get_max_stages(prev_theme)
+                play_mode.change_stage(prev_theme, prev_stage)
             else:
-                pass
+                # 같은 테마의 이전 스테이지로
+                play_mode.change_stage(play_mode.current_theme, play_mode.current_stage - 1)
+            self.x = stage_loader.get_stage_size(play_mode.current_theme, play_mode.current_stage)[0] - 50
 
     def mujeck_running(self):
         if self.mujuck_frame > 0.0:

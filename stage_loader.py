@@ -1,5 +1,6 @@
 from pico2d import *
 import game_world
+import nommor
 import play_mode
 import game_framework
 
@@ -411,9 +412,11 @@ class Tree:
 
     def __init__(self, theme_image, theme, stage, index):
         self.image = load_image(theme_image)
-
         self.tree = get_stage_tree(theme, stage)
+
         self.x, self.y, self.w, self.h = self.tree[index]
+
+        self.hp = 5
     def update(self):
         pass
 
@@ -430,4 +433,27 @@ class Tree:
         right = screen_x + 75
         top = screen_y + 75
         draw_rectangle(left, bottom, right, top, 255, 0, 0)
+    def get_bb(self):
+        left = self.x - 75  # 300 // 2
+        bottom = self.y - 75
+        right = self.x + 75
+        top = self.y + 75
+        return (left, bottom, right, top)
+    def get_attack_bb(self):
+        left = self.x - 75  # 300 // 2
+        bottom = self.y - 75
+        right = self.x + 75
+        top = self.y + 75
+        return (left, bottom, right, top)
+    def handle_collision(self, group, other):
+        pass
 
+    def handle_attack_collision(self, group, other):
+        if group == 'viego:tree':
+            if nommor.viego.is_attacking and not nommor.viego.attack_hit_done:
+                nommor.viego.attack_hit_done = True
+                self.hp -= 1
+                if self.hp <= 0:
+                    game_world.remove_object(self)
+    def handle_monster_attack_collision(self, group, other):
+        pass

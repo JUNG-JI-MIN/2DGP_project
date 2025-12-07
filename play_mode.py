@@ -65,6 +65,8 @@ def handle_events():
                     nommor.UI.quest_chang == False):
 
                 game_framework.change_mode(village_mode)
+                nommor.viego.HP = nommor.viego.max_HP
+                nommor.viego.ste = nommor.viego.max_STE
             else:
                 nommor.UI.quest_chang = False
                 nommor.UI.status_chang = False
@@ -197,9 +199,16 @@ def change_stage(theme, stage_num):
     # 발판 재로드
     plat = stage_loader.platform(f'background/{theme}_platform.png',theme, stage_num)
     game_world.add_object(plat, 0)
-    if not theme == 'snow':
-        # 몬스터 재로드
-        monsters = [monster.Yeti() for _ in range(4)]
+
+    # 몬스터 재로드
+    if theme == 'desert':
+        monsters = [monster.Yeti() for _ in range(10)]
+        game_world.add_objects(monsters, 1)
+    elif theme == 'snow':
+        monsters = [Bossmonster.Wolf() for _ in range(1)]
+        game_world.add_objects(monsters, 1)
+    else:
+        monsters = [monster.Ghost() for _ in range(10)]
         game_world.add_objects(monsters, 1)
 
     game_world.add_collision_pair('viego:item', nommor.viego, None)

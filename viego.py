@@ -88,9 +88,10 @@ class guard:
 
     def enter(self,e):
         self.viego.is_guarding = True
-        T = thunder(self.viego, self.viego.face_dir, self.viego.x + self.viego.face_dir * 50, 400, 0,self.viego.int //5 )
-        game_world.add_object(T, 1)
-        game_world.add_collision_pair('viego_thunder:monster', T, None)
+        if self.viego.can_thunder_attack:
+            T = thunder(self.viego, self.viego.face_dir, self.viego.x + self.viego.face_dir * 50, 400, 0,self.viego.int //5 )
+            game_world.add_object(T, 1)
+            game_world.add_collision_pair('viego_thunder:monster', T, None)
     def exit(self,e):
         self.viego.frame = 0
         self.viego.is_guarding = False
@@ -413,6 +414,7 @@ class Viego:
         self.is_attacking = False
         self.attack_hit_done = False
         self.can_double_jump = False
+        self.can_thunder_attack = True
         self.mujuck_frame = 0
         self.MUJUCK_TIME = 1  # 무적 지속 시간(초)
 

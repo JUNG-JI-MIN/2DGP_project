@@ -39,6 +39,7 @@ class UI:
 
         # 레벨 표시
         self.font.draw(10, 500, f'Level: {nommor.viego.level}', (0, 0, 0))
+        self.font.draw(10, 480, f'exp: {nommor.viego.cur_exp} / {nommor.viego.max_HP}', (0, 0, 0))
 
         # 상태창 (체력창 바로 밑)
         if self.status_chang:

@@ -5,6 +5,7 @@ import play_mode
 import item
 import game_framework
 import quest_center
+import village_mode
 
 PIXEL_PER_METER = (10.0 / 0.3)
 
@@ -341,7 +342,38 @@ def get_max_stages(theme):
     return max_stages.get(theme, 1)
 
 class Background:
+    display_music = None
+    village = None
+    forest = None
+    desert = None
+    snow = None
     def __init__(self, image_file_name, thema):
+        if Background.village is None:
+            Background.village = load_music('sound/village_bgm.mp3')
+            Background.village.set_volume(16)
+        if Background.forest is None:
+            Background.forest = load_music('sound/forest_bgm.mp3')
+            Background.forest.set_volume(16)
+        if Background.desert is None:
+            Background.desert = load_music('sound/desert_bgm.mp3')
+            Background.desert.set_volume(16)
+        if Background.snow is None:
+            Background.snow = load_music('sound/snow_bgm.mp3')
+            Background.snow.set_volume(16)
+        if Background.display_music is None:
+            Background.display_music = thema
+            Background.village.repeat_play()
+        elif Background.display_music != thema:
+            Background.display_music = thema
+            if thema == 'village':
+                Background.village.repeat_play()
+            elif thema == 'forest':
+                Background.forest.repeat_play()
+            elif thema == 'desert':
+                Background.desert.repeat_play()
+            elif thema == 'snow':
+                Background.snow.repeat_play()
+
         # 배경에 사용할 이미지 로드 (파일 이름을 인자로 받음)
         self.name = image_file_name
         self.image = load_image(image_file_name)
@@ -349,14 +381,16 @@ class Background:
         self.x = 0
         self.y = 0
         self.thema = thema
-        self.bgm = load_music(f'sound/{thema}_bgm.mp3')
-        self.bgm.set_volume(16)
-        self.bgm.repeat_play()
 
     def update(self):
         pass
     def draw(self):
         # 카메라 위치 가져오기
+
+        if self.name == 'background/snow.png':
+            draw_rectangle(0, 0, 1500, 3500, 185, 189, 221, 1, True)
+        if self.name == 'background/desert.png':
+            draw_rectangle(0, 0, 4000, 1500, 149, 136, 156, 1, True)
 
         camera_x = play_mode.cam.x
 

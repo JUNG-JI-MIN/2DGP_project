@@ -92,9 +92,28 @@ class wolf_attack:
         pass
 class Wolf:
     img = None
+    attack1_sound = None
+    attack2_sound = None
+    hit_sound = None
+    die_sound = None
     def __init__(self):
         if Wolf.img is None:
             Wolf.img = load_image('monster/Lycanthrope.png')
+
+        if Wolf.attack1_sound is None:
+            Wolf.attack1_sound = load_wav('sound/wolf_attack1.wav')
+            Wolf.attack1_sound.set_volume(16)
+        if Wolf.attack2_sound is None:
+            Wolf.attack2_sound = load_wav('sound/wolf_attack2.wav')
+            Wolf.attack2_sound.set_volume(16)
+        if Wolf.hit_sound is None:
+            Wolf.hit_sound = load_wav('sound/wolf_hit.wav')
+            Wolf.hit_sound.set_volume(16)
+        if Wolf.die_sound is None:
+            Wolf.die_sound = load_wav('sound/wolf_die.wav')
+            Wolf.die_sound.set_volume(16)
+
+
         self.font = load_font('ENCR10B.TTF', 16)
 
         self.HP = 1000
@@ -116,6 +135,7 @@ class Wolf:
 
         self.x = random.randint(500,1000)
         self.y = 90
+        self.exp = 1000
         self.dir = 1
         self.frame = random.randint(1,3)
         self.face_dir = 1
@@ -132,11 +152,13 @@ class Wolf:
             self.lifetime += 1 * game_framework.frame_time
 
             if (self.frame <5):
+                Wolf.die_sound.play()
                 if not self.down_top:
                     self.y -= 50
                     self.down_top = True
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
             if self.lifetime > 1.5:
+                nommor.viego.cur_exp += self.exp
                 quest_center.update_quest('wolf')
                 game_world.remove_object(self)
                 ITEM = item.Item(self.x, self.y, 'wolf')
@@ -149,6 +171,7 @@ class Wolf:
                 self.frame = 0
                 self.motion = False
             elif int(prev) < 5 <= int(self.frame):
+                Wolf.attack2_sound.play()
                 p = wolf_pohyo(nommor.viego.x,nommor.viego.y)
                 game_world.add_object(p)
                 game_world.add_collision_pair('viego:monster', None, p)
@@ -160,6 +183,7 @@ class Wolf:
                 self.frame = 0
                 self.motion = False
             elif int(prev) < 2 <= int(self.frame):
+                Wolf.attack2_sound.play()
                 if nommor.viego:
                     ball = wolf_attack(self.x, self.y,self)
                     game_world.add_object(ball)
@@ -217,12 +241,14 @@ class Wolf:
 
     def handle_collision(self, group, other):
         if group == 'viego_thunder:monster':
+            Wolf.hit_sound.play()
             self.HP -= nommor.viego.int / 5
             pass
 
     def handle_attack_collision(self, group, other):
         if group == 'viego:monster':
             if nommor.viego.is_attacking and not nommor.viego.attack_hit_done:
+                Wolf.hit_sound.play()
                 self.HP -= nommor.viego.int / 10
                 nommor.viego.attack_hit_done = True
                 if self.HP <= 0:

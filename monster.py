@@ -89,9 +89,22 @@ class fireball:
         pass
 class Ghost:
     img = None
+    hit_sound = None
+    die_sound = None
+    attack_sound = None
     def __init__(self):
         if Ghost.img is None:
             Ghost.img = load_image('monster/dark_ghost.png')
+        if Ghost.hit_sound  is None:
+            Ghost.hit_sound = load_wav('sound/ghost_hit.wav')
+            Ghost.hit_sound.set_volume(15)
+        if Ghost.die_sound  is None:
+            Ghost.die_sound = load_wav('sound/ghost_die.wav')
+            Ghost.die_sound.set_volume(15)
+        if Ghost.attack_sound  is None:
+            Ghost.attack_sound = load_wav('sound/ghost_attack.wav')
+            Ghost.attack_sound.set_volume(15)
+
         self.font = load_font('ENCR10B.TTF', 16)
 
         self.HP = 1
@@ -143,6 +156,7 @@ class Ghost:
                 self.is_attacking = False
                 self.face_dir = self.dir
             if int(prev) < 2 <= int(self.frame):
+                Ghost.attack_sound.play()
                 if nommor.viego:
                     ball = fireball(self.x, self.y, self)
                     game_world.add_object(ball)
@@ -216,11 +230,13 @@ class Ghost:
     def handle_attack_collision(self, group, other):
         if group == 'viego:monster':
             if nommor.viego.is_attacking and not nommor.viego.attack_hit_done:
+                Ghost.hit_sound.play()
                 self.HP -= nommor.viego.int / 10
                 nommor.viego.attack_hit_done = True
                 if self.HP <= 0:
                     self.die = True
                     self.frame = 0
+                    Ghost.die_sound.play()
                     game_world.remove_collision_object(self)
 
     def handle_monster_attack_collision(self,group, other):
@@ -234,7 +250,9 @@ class Ghost:
                 self.is_attacking = True
 
 class Yeti_attack:
+
     def __init__(self, x,y, yeti):
+
         self.yeti = yeti
         self.int = yeti.int
         self.x = x
@@ -271,10 +289,22 @@ class Yeti_attack:
 
 class Yeti:
     img = None
-
+    hit_sound = None
+    die_sound = None
+    attack_sound = None
     def __init__(self):
         if Yeti.img is None:
             Yeti.img = load_image('monster/Yeti.png')
+        if Yeti.hit_sound  is None:
+            Yeti.hit_sound = load_wav('sound/yeti_hit.wav')
+            Yeti.hit_sound.set_volume(15)
+        if Yeti.die_sound  is None:
+            Yeti.die_sound = load_wav('sound/yeti_die.wav')
+            Yeti.die_sound.set_volume(15)
+        if Yeti.attack_sound  is None:
+            Yeti.attack_sound = load_wav('sound/yeti_attack.wav')
+            Yeti.attack_sound.set_volume(15)
+
         self.font = load_font('ENCR10B.TTF', 16)
 
         self.HP = 100
@@ -304,6 +334,7 @@ class Yeti:
             if (self.frame < 4):
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
             else:
+                Yeti.die_sound.play()
                 quest_center.update_quest('yeti')
                 game_world.remove_object(self)
                 ITEM = item.Item(self.x + 10, self.y - 50, 'yeti')
@@ -313,6 +344,7 @@ class Yeti:
                 MONEY.value = 750
                 game_world.add_object(MONEY)
                 game_world.add_collision_pair('viego:item', None, MONEY)
+                nommor.viego.cur_exp += self.exp
         elif self.is_attacking:
             if (self.frame < 6):
                 self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
@@ -321,6 +353,7 @@ class Yeti:
                 self.face_dir = self.dir
             if int(prev) < 2 <= int(self.frame):
                 if nommor.viego:
+                    Yeti.attack_sound.play()
                     attack = Yeti_attack(self.x, self.y, self)
                     game_world.add_object(attack)
                     game_world.add_collision_pair('viego:monster', None, attack)
@@ -387,6 +420,7 @@ class Yeti:
     def handle_attack_collision(self, group, other):
         if group == 'viego:monster':
             if nommor.viego.is_attacking and not nommor.viego.attack_hit_done:
+                Yeti.hit_sound.play()
                 self.HP -= nommor.viego.int / 10
                 nommor.viego.attack_hit_done = True
                 if self.HP <= 0:

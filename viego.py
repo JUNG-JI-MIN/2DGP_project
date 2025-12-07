@@ -418,7 +418,7 @@ class Viego:
         self.is_attacking = False
         self.attack_hit_done = False
         self.can_double_jump = False
-        self.can_thunder_attack = False
+        self.can_thunder_attack = True
         self.mujuck_frame = 0
         self.MUJUCK_TIME = 1  # 무적 지속 시간(초)
 

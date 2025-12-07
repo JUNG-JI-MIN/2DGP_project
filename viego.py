@@ -12,7 +12,7 @@ import game_framework
 import stage_loader
 
 PIXEL_PER_METER = (10.0 / 0.3) # 10 pixel 30 cm.
-WALK_SPEED_KMPH = 100.0 # Km / Hour
+WALK_SPEED_KMPH = 10.0 # Km / Hour
 WALK_SPEED_MPM = (WALK_SPEED_KMPH * 1000.0 / 60.0) # Meter / Minute
 WALK_SPEED_MPS = (WALK_SPEED_MPM / 60.0) # Meter / Second
 WALK_SPEED_PPS = (WALK_SPEED_MPS * PIXEL_PER_METER) # 초당 픽셀 이동 거리 (Pixel Per Second)
@@ -162,9 +162,9 @@ class jump:
 
         # 좌우 이동
         if self.viego.is_dashing:
-            self.viego.x += self.viego.dir * DASH_SPEED_PSS * game_framework.frame_time
+            self.viego.x += self.viego.dir * DASH_SPEED_PSS * game_framework.frame_time*self.viego.dex / 10
         elif self.viego.dir != 0:
-            self.viego.x += self.viego.dir * WALK_SPEED_PPS * game_framework.frame_time
+            self.viego.x += self.viego.dir * WALK_SPEED_PPS * game_framework.frame_time*self.viego.dex / 10
 
     def draw(self):
         f = sheet_list.viego_jump
@@ -190,7 +190,7 @@ class dash:
             self.viego.frame = 0
             return
         self.viego.frame =  (self.viego.frame + self.viego.DASH_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 6
-        self.viego.x += self.viego.dir * DASH_SPEED_PSS * game_framework.frame_time
+        self.viego.x += self.viego.dir * DASH_SPEED_PSS * game_framework.frame_time * self.viego.dex / 10
         self.viego.ste -= 10 * game_framework.frame_time
 
     def draw(self):
@@ -222,7 +222,7 @@ class walk:
             self.viego.state_machine.cur_state = self.viego.DASH
             return
         self.viego.frame=(self.viego.frame + self.viego.WALK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 5
-        self.viego.x += self.viego.dir * WALK_SPEED_PPS * game_framework.frame_time
+        self.viego.x += self.viego.dir * WALK_SPEED_PPS * game_framework.frame_time * self.viego.dex / 10
         pass
 
     def draw(self):

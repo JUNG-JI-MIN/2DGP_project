@@ -117,6 +117,7 @@ def init():
     for m in monsters:
         game_world.add_collision_pair('viego:monster', None, m)
         game_world.add_collision_pair('monster:ground', None, m)
+        game_world.add_collision_pair('viego_thunder:monster', None, m)
 
 def finish():
     game_world.clear()
@@ -148,6 +149,7 @@ def change_stage(theme, stage_num):
 
     # 2. 게임 오브젝트 재로드
     game_world.clear()
+    game_world.collision_clear()
 
     # 배경 재로드
     back = stage_loader.Background(f'background/{theme}.png')
@@ -163,9 +165,13 @@ def change_stage(theme, stage_num):
         nommor.UI = UI.UI()
     game_world.add_object(nommor.UI, 2)
 
-    trees = [stage_loader.Tree(f'background/{current_theme}_tree.png', current_theme, current_stage, i) for i in
-             range(stage_loader.get_tree_count(current_theme, current_stage))]
-    game_world.add_objects(trees, 0)
+    if theme == 'snow' and stage_num == 2:
+        tree = stage_loader.Tree(f'background/gold_tree.png', current_theme, current_stage, 0)
+        game_world.add_object(tree, 0)
+    else:
+        trees = [stage_loader.Tree(f'background/{current_theme}_tree.png', current_theme, current_stage, i) for i in
+                 range(stage_loader.get_tree_count(current_theme, current_stage))]
+        game_world.add_objects(trees, 0)
 
     # 발판 재로드
     plat = stage_loader.platform(f'background/{theme}_platform.png',theme, stage_num)
@@ -175,16 +181,23 @@ def change_stage(theme, stage_num):
         monsters = [monster.Yeti() for _ in range(4)]
         game_world.add_objects(monsters, 1)
 
+    game_world.add_collision_pair('viego:item', nommor.viego, None)
     game_world.add_collision_pair('viego:monster', nommor.viego, None)
     game_world.add_collision_pair('viego:monster_attack', nommor.viego, None)
     game_world.add_collision_pair('viego:ground', nommor.viego, None)
-    for t in trees:
-        game_world.add_collision_pair('viego:tree', None, t)
-    pass
+    game_world.add_collision_pair('viego:tree', nommor.viego, None)
+
+    if theme == 'snow' and stage_num == 2:
+        game_world.add_collision_pair('viego:tree', None, tree)
+    else:
+        for t in trees:
+            game_world.add_collision_pair('viego:tree', None, t)
+
 
     for m in monsters:
         game_world.add_collision_pair('viego:monster', None, m)
         game_world.add_collision_pair('monster:ground', None, m)
+        game_world.add_collision_pair('viego_thunder:monster', None, m)
     pass
 
 

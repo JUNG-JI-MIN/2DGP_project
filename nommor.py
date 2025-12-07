@@ -1,2 +1,0 @@
-viego = None
-UI = None

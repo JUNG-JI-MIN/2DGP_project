@@ -1,6 +1,7 @@
 from pico2d import *
 import Bossmonster
 import logo_mode
+import village_mode
 from viego import Viego
 import game_world
 import game_framework
@@ -63,7 +64,7 @@ def handle_events():
                     nommor.UI.armor_chang == False and
                     nommor.UI.quest_chang == False):
 
-                game_framework.quit()
+                game_framework.change_mode(village_mode)
             else:
                 nommor.UI.quest_chang = False
                 nommor.UI.status_chang = False

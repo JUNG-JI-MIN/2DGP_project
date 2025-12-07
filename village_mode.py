@@ -86,7 +86,7 @@ def handle_events():
             # 상태창 클릭
             if nommor.UI.status_chang:
                 if 245 <= mouse_x <= 300:
-                    if 140 <= mouse_y <= 165:
+                    if 140 <= event.y <= 165:
                         if nommor.viego.money >= 300 + nommor.viego.str*150:
                             nommor.viego.money -= 300 + nommor.viego.str*150
                             nommor.viego.str += 5

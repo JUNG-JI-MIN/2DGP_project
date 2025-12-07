@@ -98,7 +98,7 @@ class fireball:
                 else:
                     if nommor.viego.HP > 0:
                         nommor.viego.HP -= self.ghost.int / 100
-        pass
+
     def handle_attack_collision(self, group, other):
         pass
     def handle_monster_attack_collision(self,group, other):
@@ -116,6 +116,8 @@ class Ghost:
         self.idle = False
         self.walk = True
         self.int = 10
+        self.exp = 30
+        self.monster_level = 5
 
         self.IDLE_FRAME_PER_ACTION = 1
         self.ATTACK_FRAME_PER_ACTION = 6
@@ -147,6 +149,8 @@ class Ghost:
                 MONEY.value = 500
                 game_world.add_object(MONEY)
                 game_world.add_collision_pair('viego:item', None, MONEY)
+
+                nommor.viego.cur_exp += self.exp
         elif self.is_attacking:
             if (self.frame <5):
                 self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
@@ -230,6 +234,12 @@ class Ghost:
     def handle_collision(self, group, other):
         if group == 'viego:monster':
             pass
+        if group == 'viego_thunder:monster':
+            self.HP -= nommor.viego.int / 5
+            if self.HP <= 0:
+                self.die = True
+                self.frame = 0
+                game_world.remove_collision_object(self)
 
     def handle_attack_collision(self, group, other):
         if group == 'viego:monster':
@@ -317,6 +327,7 @@ class Yeti:
         self.idle = False
         self.walk = True
         self.int = 20
+        self.exp = 50
 
         self.IDLE_FRAME_PER_ACTION = 1 # 3
         self.ATTACK_FRAME_PER_ACTION = 6 # 6
@@ -326,7 +337,7 @@ class Yeti:
         self.x = random.randint(0, 2400)
         self.mx = self.x - 500
         self.Mx = self.x + 500
-        self.y = 50
+        self.y = 70
         self.dir = 1
         self.frame = random.randint(1, 3)
         self.face_dir = 1
@@ -375,7 +386,7 @@ class Yeti:
         screen_x, screen_y = game_world.render(self, self.x, self.y)  # 카메라 좌표로 변환
 
         if self.die == True:
-            f = sheet_list.yeti_die[int(self.frame)]
+            f = sheet_list.yeti_die[min(int(self.frame), 3)]
         elif self.is_attacking == True:
             f = sheet_list.yeti_attack[min(int(self.frame), 3)]  # 안전하게 인덱스 접근
         elif self.walk == True:
@@ -421,6 +432,12 @@ class Yeti:
     def handle_collision(self, group, other):
         if group == 'viego:monster':
             pass
+        if group == 'viego_thunder:monster':
+            self.HP -= nommor.viego.int / 5
+            if self.HP <= 0:
+                self.die = True
+                self.frame = 0
+                game_world.remove_collision_object(self)
 
     def handle_attack_collision(self, group, other):
         if group == 'viego:monster':

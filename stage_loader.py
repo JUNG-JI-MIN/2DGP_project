@@ -416,6 +416,7 @@ class Tree:
         self.image = load_image(theme_image)
         self.tree = get_stage_tree(theme, stage)
         self.thema = theme
+        self.stage = stage
 
         self.x, self.y, self.w, self.h = self.tree[index]
 
@@ -457,7 +458,10 @@ class Tree:
                 nommor.viego.attack_hit_done = True
                 self.hp -= 5
                 if self.hp <= 0:
-                    quest_center.update_quest(f'{self.thema}_tree')
+                    if self.thema == 'snow' and self.stage == 2:
+                        quest_center.update_quest('gold_tree')
+                    else:
+                        quest_center.update_quest(f'{self.thema}_tree')
                     game_world.remove_object(self)
                     ITEM = item.Item(self.x + 10, self.y - 50, f'{self.thema}_tree')
                     ITEM.value = 500
@@ -468,7 +472,10 @@ class Tree:
                     elif self.thema == 'desert':
                         nommor.viego.desert_tree_item += 1
                     elif self.thema == 'snow':
-                        nommor.viego.snow_tree_item += 1
+                        if self.stage == 1:
+                            nommor.viego.snow_tree_item += 1
+                        else:
+                            nommor.viego.gold_tree_item += 1
 
     def handle_monster_attack_collision(self, group, other):
         pass

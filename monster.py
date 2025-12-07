@@ -26,6 +26,7 @@ class fireball:
         self.font = load_font('ENCR10B.TTF', 16)
         self.ghost = ghost
         self.frame = 0
+        self.int = ghost.int
 
         self.ATTACK_FRAME_PER_ACTION = 2
 
@@ -145,7 +146,7 @@ class Ghost:
                 if nommor.viego:
                     ball = fireball(self.x, self.y, self)
                     game_world.add_object(ball)
-                    game_world.add_collision_pair('viego:monster_attack', None, ball)
+                    game_world.add_collision_pair('viego:monster', None, ball)
         elif self.walk == True:
             self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
             self.frame = (self.frame + self.RUN_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 6
@@ -235,6 +236,7 @@ class Ghost:
 class Yeti_attack:
     def __init__(self, x,y, yeti):
         self.yeti = yeti
+        self.int = yeti.int
         self.x = x
         self.y = y
         self.ATTACK_FRAME_PER_ACTION = 2
@@ -321,7 +323,7 @@ class Yeti:
                 if nommor.viego:
                     attack = Yeti_attack(self.x, self.y, self)
                     game_world.add_object(attack)
-                    game_world.add_collision_pair('viego:monster_attack', None, attack)
+                    game_world.add_collision_pair('viego:monster', None, attack)
         elif self.walk == True:
             self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
             self.frame = (self.frame + self.RUN_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 4

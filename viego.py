@@ -12,7 +12,7 @@ import game_framework
 import stage_loader
 
 PIXEL_PER_METER = (10.0 / 0.3) # 10 pixel 30 cm.
-WALK_SPEED_KMPH = 10.0 # Km / Hour
+WALK_SPEED_KMPH = 100.0 # Km / Hour
 WALK_SPEED_MPM = (WALK_SPEED_KMPH * 1000.0 / 60.0) # Meter / Minute
 WALK_SPEED_MPS = (WALK_SPEED_MPM / 60.0) # Meter / Second
 WALK_SPEED_PPS = (WALK_SPEED_MPS * PIXEL_PER_METER) # 초당 픽셀 이동 거리 (Pixel Per Second)
@@ -44,7 +44,7 @@ class thunder:
         else:
             if self.count < self.max_count:
                 print( f'{self.count=} ,{self.max_count=}')
-                T = thunder(self.viego,self.dir, self.x + self.max_count * 60 * self.dir, self.y, self.count +1,self.max_count)
+                T = thunder(self.viego,self.dir, self.x + 200 * self.dir, self.y, self.count +1,self.max_count)
                 game_world.add_object(T, 1)
                 game_world.add_collision_pair('viego_thunder:monster', T, None)
 
@@ -54,18 +54,26 @@ class thunder:
         f = sheet_list.viego_thunder_attack[int(self.frame)]
         screen_x, screen_y = game_world.render(self.viego, self.x, self.y)
         thunder.image.clip_draw(f[0], 1240 - f[1] - f[3], f[2], f[3], screen_x, screen_y,500,800)
+
+        # 카메라 오프셋 계산
+        offset_x = screen_x - self.x
+        offset_y = screen_y - self.y
+
+        # 바운딩 박스를 카메라 좌표로 변환
+        left, bottom, right, top = self.get_bb()
+        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y)
         pass
 
     def get_bb(self):
-        return (self.viego.x - 15,
-                self.viego.y - 15,
-                self.viego.x + 15,
-                self.viego.y + 15)
+        return (self.x - 100,
+                self.y - 400,
+                self.x + 100,
+                self.y + 400)
     def get_attack_bb(self):
-        return (self.viego.x - 20,
-                self.viego.y - 20,
-                self.viego.x + 20,
-                self.viego.y + 20)
+        return (self.x - 20,
+                self.y - 20,
+                self.x + 20,
+                self.y + 20)
     def handle_collision(self, group, other):
         pass
     def handle_attack_collision(self, group, other):
@@ -348,8 +356,7 @@ class Viego:
         self.max_HP = 500
         self.ste = 100
         self.max_STE = 100
-        self.money = 0
-
+        self.money = 1000000
         self.str = 10
         self.int = 10
         self.dex = 10
@@ -362,8 +369,16 @@ class Viego:
         self.yeti_item = 0
         self.wolf_item = 0
         self.forest_tree_item = 0
-        self.deser_tree_item = 0
+        self.desert_tree_item = 0
         self.snow_tree_item = 0
+        self.gold_tree_item = 0
+
+        # 장비
+        self.Weapon_level = 4
+        self.Helmet_level = 0
+        self.Armor_level = 0
+        self.Boots_level = 0
+        self.Accessory_level = 0
 
         # 각 프레임 별 속도 설정
         self.IDLE_FRAME_PER_ACTION  = 3

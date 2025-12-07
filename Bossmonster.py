@@ -122,11 +122,13 @@ class Wolf:
         self.can_attack = True
         self.motion = False
 
-        self.x = random.randint(0,2400)
+        self.x = random.randint(500,1000)
         self.y = 90
         self.dir = 1
         self.frame = random.randint(1,3)
         self.face_dir = 1
+        self.lifetime = 0.0
+        self.down_top = False
 
         self.build_behavior_tree()
 
@@ -135,16 +137,19 @@ class Wolf:
         print (self.HP)
         self.bt.run()
         if self.die:
+            self.lifetime += 1 * game_framework.frame_time
+
             if (self.frame <5):
+                if not self.down_top:
+                    self.y -= 50
+                    self.down_top = True
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
-            else:
-                quest_center.update_quest('ghost')
+            if self.lifetime > 1.5:
+                quest_center.update_quest('wolf')
                 game_world.remove_object(self)
-                ITEM = item.Item(self.x, self.y- 50, 'wolf')
+                ITEM = item.Item(self.x, self.y, 'wolf')
                 game_world.add_object(ITEM)
                 game_world.add_collision_pair('viego:item', None, ITEM)
-            if int(prev) < 1 <= int(self.frame):
-                self.y -= 25
         elif self.pohyo:
             self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 7
 
@@ -233,7 +238,8 @@ class Wolf:
                 self.y + 100)
 
     def handle_collision(self, group, other):
-        if group == 'viego:monster':
+        if group == 'viego_thunder:monster':
+            self.HP -= nommor.viego.int / 5
             pass
 
     def handle_attack_collision(self, group, other):
@@ -313,7 +319,6 @@ class Wolf:
             self.face_dir = 1
         return BehaviorTree.SUCCESS
     def dies(self):
-        self.frame = 0
         self.attack = False
         self.idle = False
         self.walk = False

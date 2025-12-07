@@ -107,7 +107,8 @@ quest_list = {
         },
         'reward': {
             'exp': 8000,
-            'money': 50000
+            'money': 50000,
+            'thunder_attack' : True
         }
     }
 }
@@ -174,6 +175,9 @@ def finish_quest(quest_id):
         nommor.viego.HP += 150
         nommor.viego.Boots_level += 1
         nommor.viego.dex += 10
+    elif 'thunder_attack' in reward:
+        print("보상: 번개 공격 능력 획득!")
+        nommor.viego.can_thunder_attack = True
 
     # 상태 업데이트
     player_quest['completed'].append(quest_id)

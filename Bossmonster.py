@@ -133,8 +133,9 @@ class Wolf:
 
     def update(self):
         prev = self.frame
+        print (self.HP)
         self.bt.run()
-        if self.die == True:
+        if self.die:
             if (self.frame <5):
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
             else:
@@ -143,30 +144,31 @@ class Wolf:
                 ITEM = item.Item(self.x, self.y- 50, 'wolf')
                 game_world.add_object(ITEM)
                 game_world.add_collision_pair('viego:item', None, ITEM)
-        elif self.pohyo == True:
-            if (self.frame <7):
-                self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+            if int(prev) < 1 <= int(self.frame):
+                self.y -= 25
+        elif self.pohyo:
+            self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 7
 
-            else:
+            if int(prev) < 6 <= int(self.frame):
+                self.frame = 0
                 self.motion = False
-            if int(prev) < 5 <= int(self.frame):
+            elif int(prev) < 5 <= int(self.frame):
                 p = wolf_pohyo(nommor.viego.x,nommor.viego.y)
                 game_world.add_object(p)
                 game_world.add_collision_pair('viego:monster', None, p)
 
-        elif self.attack == True:
-            if (self.frame <5):
-                self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+        elif self.attack:
+            self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 5
 
-            else:
+            if int(prev) < 4 <= int(self.frame):
+                self.frame = 0
                 self.motion = False
-            if int(prev) < 2 <= int(self.frame):
+            elif int(prev) < 2 <= int(self.frame):
                 if nommor.viego:
-                    self.can_attack = True
                     ball = wolf_attack(self.x, self.y,self)
                     game_world.add_object(ball)
                     game_world.add_collision_pair('viego:monster_attack', None, ball)
-        elif self.walk == True:
+        elif self.walk:
             self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
             self.frame = (self.frame + self.RUN_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 4
 
@@ -210,6 +212,8 @@ class Wolf:
         left, bottom, right, top = self.get_bb()
         draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y)
 
+
+
     def handle_event(self, event):
         pass
 
@@ -243,15 +247,31 @@ class Wolf:
             pass
 
     def distance_less_than(self):
-        distance = (nommor.viego.x - self.x) ** 2 + (nommor.viego.y - self.y) ** 2
-        return distance < 50 ** 2
+        dx = abs(nommor.viego.x - self.x)
+        dy = abs(nommor.viego.y - self.y)
+
+        # X축 거리 200 이내 + Y축 차이 50 이내일 때만 공격
+        if dx < 200 and dy < 200:
+            return BehaviorTree.SUCCESS
+        else:
+            return BehaviorTree.FAIL
 
     def player_more_than_y(self):
-        return nommor.viego.y > self.y + 100
+        if nommor.viego.y > self.y + 100:
+            return BehaviorTree.SUCCESS
+        else:
+            return BehaviorTree.FAIL
     def if_motion(self):
-        return not self.motion
+        if not self.motion:
+            return BehaviorTree.SUCCESS
+        else:
+            return BehaviorTree.FAIL
+
     def dead(self):
-        return self.HP <= 0
+        if self.HP <= 0:
+            return BehaviorTree.SUCCESS
+        else:
+            return BehaviorTree.FAIL
 
     def attack_player(self):
         self.attack = True
@@ -272,13 +292,22 @@ class Wolf:
         self.motion = True
         pass
     def go_to_player(self):
+        self.frame = 0
         self.attack = False
         self.idle = False
         self.walk = True
         self.die = False
         self.pohyo = False
+        self.motion = False
+        if nommor.viego.x < self.x:
+            self.dir = -1
+            self.face_dir = -1
+        else:
+            self.dir = 1
+            self.face_dir = 1
         pass
     def dies(self):
+        self.frame = 0
         self.attack = False
         self.idle = False
         self.walk = False

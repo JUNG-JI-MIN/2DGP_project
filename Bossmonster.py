@@ -117,9 +117,9 @@ class Wolf:
 
         self.attack = False
         self.idle = False
-        self.walk = False
+        self.walk = True
         self.die = False
-        self.pohyo = True
+        self.pohyo = False
         self.can_attack = True
         self.motion = False
 
@@ -177,9 +177,9 @@ class Wolf:
         pass
 
     def draw(self):
-        f = sheet_list.wolf_idle[min(int(self.frame),2)] # 안전하게 인덱스 접근
         screen_x, screen_y = game_world.render(self, self.x, self.y)  # 카메라 좌표로 변환
-
+        print(self.walk)
+        print(self.idle)
         if self.die == True:
             f = sheet_list.wolf_die[min(int(self.frame),4)]
 
@@ -191,9 +191,8 @@ class Wolf:
 
         elif self.pohyo == True:
             f = sheet_list.wolf_pohyo[min(int(self.frame),4)] # 안전하게 인덱스 접근
-
-        elif self.pohyo == True:
-            f = sheet_list.wolf_pohyo[min(int(self.frame),6)] # 안전하게 인덱스 접근
+        else:
+            f = sheet_list.wolf_idle[min(int(self.frame), 2)]  # 안전하게 인덱스 접근
 
         self.font.draw(screen_x - 70, screen_y + 120, f'(HP : {self.HP:.2f})', (255, 255, 0))
 
@@ -212,7 +211,12 @@ class Wolf:
         left, bottom, right, top = self.get_bb()
         draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y)
 
-
+        draw_rectangle(
+            screen_x - 200,  # 왼쪽 (x - 200)
+            screen_y - 200,  # 아래쪽 (y - 200)
+            screen_x + 200,  # 오른쪽 (x + 200)
+            screen_y + 200,  # 위쪽 (y + 200)
+        )
 
     def handle_event(self, event):
         pass
@@ -274,6 +278,8 @@ class Wolf:
             return BehaviorTree.FAIL
 
     def attack_player(self):
+        if self.motion:
+            return BehaviorTree.SUCCESS
         self.attack = True
         self.idle = False
         self.walk = False
@@ -281,8 +287,10 @@ class Wolf:
         self.pohyo = False
         self.can_attack = True
         self.motion = True
-        pass
+        return BehaviorTree.SUCCESS
     def hi_attack_player(self):
+        if self.attack and self.motion:
+            return BehaviorTree.SUCCESS
         self.attack = False
         self.idle = False
         self.walk = False
@@ -290,9 +298,8 @@ class Wolf:
         self.pohyo = True
         self.can_attack = False
         self.motion = True
-        pass
+        return BehaviorTree.SUCCESS
     def go_to_player(self):
-        self.frame = 0
         self.attack = False
         self.idle = False
         self.walk = True
@@ -305,7 +312,7 @@ class Wolf:
         else:
             self.dir = 1
             self.face_dir = 1
-        pass
+        return BehaviorTree.SUCCESS
     def dies(self):
         self.frame = 0
         self.attack = False
@@ -314,6 +321,7 @@ class Wolf:
         self.die = True
         self.pohyo = False
         self.motion = True
+        return BehaviorTree.SUCCESS
     def build_behavior_tree(self):
 
         a1 = Action('Attack Player', self.attack_player)

@@ -31,15 +31,16 @@ class Item:
 
     def handle_collision(self, group, other):
         if group == "viego:item":
-            game_world.remove_object(self)
-
             if self.type == "ghost":
                 nommor.viego.ghost_item += 1
             if self.type == "yeti":
                 nommor.viego.yeti_item += 1
             if self.type == "wolf":
                 nommor.viego.wolf_item += 1
+            if self.type == "money":
+                nommor.viego.money += self.value
             pass
+            game_world.remove_object(self)
 
 
     def handle_attack_collision(self,group, other):

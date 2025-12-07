@@ -1,8 +1,9 @@
-from pico2d import load_image, get_time, load_font, draw_rectangle
+from pico2d import load_image, get_time, load_font, draw_rectangle, load_wav, load_music
 from pyvisalgo.welzl import min_circle_trivial
 from sdl2 import SDL_KEYDOWN, SDL_KEYUP
 
 import game_world
+import nommor
 import play_mode
 from events import space_down, time_out, a_key, a_key_up, s_key_down, s_key_up, right_down, left_down, right_up, \
     left_up, up_down, up_up, z_key_down
@@ -29,15 +30,20 @@ FRAMES_PER_ACTION = 3
 class thunder:
     image = None
     index = 0
+    bolt = None
     def __init__(self, viego, direction, x, y, count=1,max_count=5):
         if thunder.image is None:
             thunder.image = load_image('Sprite_Sheets/thunder.png')
+        if thunder.bolt is None:
+            thunder.bolt = load_wav('sound/bolt.wav')
+            thunder.bolt.set_volume(15)
         self.viego = viego
         self.frame = 0
         self.dir = direction
         self.max_count = max_count
         self.x, self.y = x, y
         self.count = count
+        thunder.bolt.play()
     def update(self):
         if self.frame < 14:
             self.frame = (self.frame + 16 * ACTION_PER_TIME * game_framework.frame_time)
@@ -81,6 +87,7 @@ class guard:
     def enter(self,e):
         self.viego.is_guarding = True
         if self.viego.can_thunder_attack:
+            self.viego.thunder_sound.play()
             T = thunder(self.viego, self.viego.face_dir, self.viego.x + self.viego.face_dir * 50, 400, 0,self.viego.int //5 )
             game_world.add_object(T, 1)
             game_world.add_collision_pair('viego_thunder:monster', T, None)
@@ -257,6 +264,7 @@ class attack:
 
 
     def enter(self,e):
+        self.viego.attack_sound.play()
         # 이전 공격에서 1.0초 이내에 다시 공격하면 콤보 증가
         self.viego.ste -= 10
         self.viego.attack_hit_done = False
@@ -332,11 +340,22 @@ class Idle:
 
 class Viego:
     img = None
-
+    attack_sound = None
+    guard_sound = None
+    thunder_sound = None
     def __init__(self):
         self.attack_range = ((50, 45), (50, 45), (50, 45), (50, 45), (50, 45))
         if Viego.img is None:
             Viego.img = load_image('Sprite_Sheets/main_character.png')
+        if Viego.attack_sound is None:
+            Viego.attack_sound = load_wav('sound/viego_attack.wav')
+            Viego.attack_sound.set_volume(15)
+        if Viego.guard_sound is None:
+            Viego.guard_sound = load_wav('sound/viego_guard.wav')
+            Viego.guard_sound.set_volume(15)
+        if Viego.thunder_sound is None:
+            Viego.thunder_sound = load_wav('sound/thunder.wav')
+            Viego.thunder_sound.set_volume(15)
         # 스텟
         self.HP = 500
         self.max_HP = 500
@@ -399,7 +418,7 @@ class Viego:
         self.is_attacking = False
         self.attack_hit_done = False
         self.can_double_jump = False
-        self.can_thunder_attack = True
+        self.can_thunder_attack = False
         self.mujuck_frame = 0
         self.MUJUCK_TIME = 1  # 무적 지속 시간(초)
 
@@ -572,13 +591,12 @@ class Viego:
             self.on_ground = False
 
     def handle_collision(self, group, other): # 몸통 충돌 처리
-
-
         if group == 'viego:monster':
             if self.mujuck_frame > 0.0:
                 return
 
             if self.is_guarding:
+                Viego.guard_sound.play()
                 self.ste -= 5
                 self.x -= 5 * self.face_dir
                 if self.ste < 0:

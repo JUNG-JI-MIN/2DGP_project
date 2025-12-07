@@ -350,7 +350,7 @@ class Background:
         self.y = 0
         self.thema = thema
         self.bgm = load_music(f'sound/{thema}_bgm.mp3')
-        self.bgm.set_volume(32)
+        self.bgm.set_volume(16)
         self.bgm.repeat_play()
 
     def update(self):
@@ -404,16 +404,22 @@ class platform:
 
 
 class Tree:
-
-
+    tree_hit = None
+    tree_die = None
     def __init__(self, theme_image, theme, stage, index):
+        if Tree.tree_hit is None:
+            Tree.tree_hit = load_wav('sound/tree_hit.wav')
+            Tree.tree_hit.set_volume(16)
+        if Tree.tree_die is None:
+            Tree.tree_die = load_wav('sound/tree_die.wav')
+            Tree.tree_die.set_volume(16)
+
         self.image = load_image(theme_image)
         self.tree = get_stage_tree(theme, stage)
         self.thema = theme
         self.stage = stage
 
         self.x, self.y, self.w, self.h = self.tree[index]
-
         self.hp = 5
     def update(self):
         pass
@@ -444,8 +450,10 @@ class Tree:
         if group == 'viego:tree':
             if nommor.viego.is_attacking and not nommor.viego.attack_hit_done:
                 nommor.viego.attack_hit_done = True
-                self.hp -= 5
+                self.hp -= 1
+                Tree.tree_hit.play()
                 if self.hp <= 0:
+                    Tree.tree_die.play()
                     if self.thema == 'snow' and self.stage == 2:
 
                         quest_center.update_quest('gold_tree')

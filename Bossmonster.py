@@ -17,7 +17,42 @@ RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 TIME_PER_ACTION = 1
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 3
+class wolf_pohyo:
+    image = None
+    def __init__(self,x,y):
+        if wolf_pohyo.image is None:
+            wolf_pohyo.image = load_image('monster/wolf_motion.png')
 
+        self.x, self.y = x, y
+        self.frame = 0
+        self.int = 100
+
+    def update(self):
+        if (self.frame <2):
+            self.frame = (self.frame + 5 * ACTION_PER_TIME * game_framework.frame_time)
+        else:
+            game_world.remove_object(self)
+    def draw(self):
+        screen_x, screen_y = game_world.render(self, self.x,self.y)  # 카메라 좌표로 변환
+        wolf_pohyo.image.draw(screen_x, screen_y)
+
+
+    def get_bb(self):
+        return (
+            self.x - 10,
+            self.y - 10,
+            self.x + 10,
+            self.y + 10
+        )
+    def get_attack_bb(self):
+        return (0,0,0,0)
+    def handle_collision(self, group, other):
+        pass
+    def handle_attack_collision(self, group, other):
+        pass
+
+    def handle_monster_attack_collision(self,group, other):
+        pass
 class wolf_attack:
     def __init__(self, x,y, wolf):
         self.wolf = wolf
@@ -30,11 +65,20 @@ class wolf_attack:
         self.y = y
 
     def update(self):
-        if (self.frame <2):
+        if (self.frame <2000000):
             self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
         else:
             game_world.remove_object(self)
     def draw(self):
+        screen_x, screen_y = game_world.render(self, self.x, self.y)  # 카메라 좌표로 변환
+
+        # 카메라 오프셋 계산
+        offset_x = screen_x - self.x
+        offset_y = screen_y - self.y
+
+        # 바운딩 박스를 카메라 좌표로 변환
+        left, bottom, right, top = self.get_attack_bb()
+        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y)
         pass
     def get_bb(self):
         return (self.x - 15,
@@ -42,9 +86,9 @@ class wolf_attack:
                 self.x + 15,
                 self.y + 15)
     def get_attack_bb(self):
-        return (self.x - 20,
+        return (self.x - 50,
                 self.y - 20,
-                self.x + 20,
+                self.x + 50,
                 self.y + 20)
     def handle_collision(self, group, other):
         if group == 'viego:monster':
@@ -64,6 +108,7 @@ class Wolf:
 
         self.HP = 1000
         self.str = 10
+        self.int = 100
 
         self.IDLE_FRAME_PER_ACTION = 1
         self.ATTACK_FRAME_PER_ACTION = 6
@@ -71,11 +116,12 @@ class Wolf:
         self.RUN_FRAME_PER_ACTION = 8
 
         self.attack = False
-        self.idle = True
+        self.idle = False
         self.walk = False
         self.die = False
-        self.pohyo = False
+        self.pohyo = True
         self.can_attack = True
+        self.motion = False
 
         self.x = random.randint(0,2400)
         self.y = 90
@@ -87,7 +133,7 @@ class Wolf:
 
     def update(self):
         prev = self.frame
-
+        self.bt.run()
         if self.die == True:
             if (self.frame <5):
                 self.frame = (self.frame + self.DIE_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
@@ -97,17 +143,27 @@ class Wolf:
                 ITEM = item.Item(self.x, self.y- 50, 'wolf')
                 game_world.add_object(ITEM)
                 game_world.add_collision_pair('viego:item', None, ITEM)
+        elif self.pohyo == True:
+            if (self.frame <7):
+                self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+
+            else:
+                self.motion = False
+            if int(prev) < 5 <= int(self.frame):
+                p = wolf_pohyo(nommor.viego.x,nommor.viego.y)
+                game_world.add_object(p)
+                game_world.add_collision_pair('viego:monster', None, p)
+
         elif self.attack == True:
             if (self.frame <5):
                 self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
             else:
-                self.is_attacking = False
-                self.face_dir = self.dir
+                self.motion = False
             if int(prev) < 2 <= int(self.frame):
                 if nommor.viego:
                     self.can_attack = True
-                    ball = wolf_attack(self.x, self.y)
+                    ball = wolf_attack(self.x, self.y,self)
                     game_world.add_object(ball)
                     game_world.add_collision_pair('viego:monster_attack', None, ball)
         elif self.walk == True:
@@ -123,7 +179,7 @@ class Wolf:
         screen_x, screen_y = game_world.render(self, self.x, self.y)  # 카메라 좌표로 변환
 
         if self.die == True:
-            f = sheet_list.wolf_die[int(self.frame)]
+            f = sheet_list.wolf_die[min(int(self.frame),4)]
 
         elif self.attack == True:
             f = sheet_list.wolf_attack[min(int(self.frame),4)] # 안전하게 인덱스 접근
@@ -137,7 +193,7 @@ class Wolf:
         elif self.pohyo == True:
             f = sheet_list.wolf_pohyo[min(int(self.frame),6)] # 안전하게 인덱스 접근
 
-        self.font.draw(screen_x - 70, screen_y + 70, f'(HP : {self.HP:.2f})', (255, 255, 0))
+        self.font.draw(screen_x - 70, screen_y + 120, f'(HP : {self.HP:.2f})', (255, 255, 0))
 
         if self.face_dir == -1:  # right
             Wolf.img.clip_draw(f[0], 1322 - f[1] - f[3], f[2], f[3], screen_x, screen_y)
@@ -174,10 +230,14 @@ class Wolf:
             pass
 
     def handle_attack_collision(self, group, other):
-        if group == 'viego:monster_attack':
-            if self.can_attack:
-                self.HP -= nommor.viego.str
-            pass
+        if group == 'viego:monster':
+            if nommor.viego.is_attacking and not nommor.viego.attack_hit_done:
+                self.HP -= nommor.viego.int / 10
+                nommor.viego.attack_hit_done = True
+                if self.HP <= 0:
+                    self.die = True
+                    self.frame = 0
+                    game_world.remove_collision_object(self)
 
     def handle_monster_attack_collision(self,group, other):
             pass
@@ -185,23 +245,13 @@ class Wolf:
     def distance_less_than(self):
         distance = (nommor.viego.x - self.x) ** 2 + (nommor.viego.y - self.y) ** 2
         return distance < 50 ** 2
-        pass
 
-    def distance_more_than(self, x1, y1, x2, y2, r):
-        distance = (x1 - x2) ** 2 + (y1 - y2) ** 2
-        return distance > (PIXEL_PER_METER * r) ** 2
-        pass
-
-    def move_little_to(self, tx, ty):
-        # frame time 을 이용해서 이동 거리 계산
-        self.dir = math.atan2(ty - self.y, tx - self.x)
-        distance = RUN_SPEED_PPS * game_framework.frame_time
-        self.x += distance * math.cos(self.dir)
-        self.y += distance * math.sin(self.dir)
-        pass
-
-    def is_hp_low(self):
-        return self.HP < 300
+    def player_more_than_y(self):
+        return nommor.viego.y > self.y + 100
+    def if_motion(self):
+        return not self.motion
+    def dead(self):
+        return self.HP <= 0
 
     def attack_player(self):
         self.attack = True
@@ -210,8 +260,17 @@ class Wolf:
         self.die = False
         self.pohyo = False
         self.can_attack = True
+        self.motion = True
         pass
-
+    def hi_attack_player(self):
+        self.attack = False
+        self.idle = False
+        self.walk = False
+        self.die = False
+        self.pohyo = True
+        self.can_attack = False
+        self.motion = True
+        pass
     def go_to_player(self):
         self.attack = False
         self.idle = False
@@ -219,25 +278,39 @@ class Wolf:
         self.die = False
         self.pohyo = False
         pass
-
-    def runaway_from_player(self):
+    def dies(self):
         self.attack = False
         self.idle = False
-        self.walk = True
-        self.die = False
+        self.walk = False
+        self.die = True
         self.pohyo = False
-        pass
-
+        self.motion = True
     def build_behavior_tree(self):
 
         a1 = Action('Attack Player', self.attack_player)
         a2 = Action('Go to Player', self.go_to_player)
-        a3 = Action('Runaway from Player', self.runaway_from_player)
+        a3 = Action('Hi Attack Player', self.hi_attack_player)
+        a4 = Action('Die', self.dies)
 
         c1 = Condition('Distance < 50', self.distance_less_than)
-        c2 = Condition('HP < 300', self.is_hp_low)
+        c2 = Condition('Player Y > Monster Y + 100', self.player_more_than_y)
+        c3 = Condition('If not in motion', self.if_motion)
+        c4 = Condition('Dead', self.dead)
 
-        chase_boy_if_nearby = Sequence('go to player',c1,c2)
+        hi_attack_node = Sequence('Attack Sequence', c2, a3)
+        how_attack_node = Selector('뭘로 공격할거니', hi_attack_node, a1)
+        attack_node = Sequence('공격 할거니?', c1, how_attack_node)
+
+        attack_or_cahes = Selector('공격 아니면 추적',attack_node, a2)
+        move_node = Sequence('지금 움직여도 됨?', c3, attack_or_cahes)
+
+        living = Sequence('살아있니?', c4, a4)
+
+        wolf_BH = Selector("늑대 행동 트리", living, move_node)
+
+        root = wolf_BH
+
+        self.bt = BehaviorTree(root)
 
         pass
 

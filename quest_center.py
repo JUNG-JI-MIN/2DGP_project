@@ -7,11 +7,12 @@ quest_list = {
         'objective': {
             'type': 'kill',        # kill, collect 등
             'target': 'ghost',
-            'count': 5
+            'count': 1
         },
         'reward': {
             'exp': 100,
-            'money': 304
+            'money': 304,
+            'Equipment_upgrade' : True
         }
     },
 
@@ -21,11 +22,12 @@ quest_list = {
         'objective': {
             'type': 'kill',
             'target': 'yeti',
-            'count': 3
+            'count': 3,
         },
         'reward': {
             'exp': 400,
-            'money': 1400
+            'money': 1400,
+            'accessory_upgrade' : True
         }
     },
     3: {
@@ -94,6 +96,19 @@ quest_list = {
             'money': 5000,
             'double_jump' : True
         }
+    },
+    8: {
+        'name': 'gold tree gather',
+        'description': 'collect 2 gold trees',
+        'objective': {
+            'type': 'collect',
+            'target': 'gold_tree',
+            'count': 2
+        },
+        'reward': {
+            'exp': 8000,
+            'money': 50000
+        }
     }
 }
 
@@ -143,6 +158,22 @@ def finish_quest(quest_id):
     if 'double_jump' in reward:
         print("보상: 더블 점프 능력 획득!")
         nommor.viego.can_double_jump = True
+    elif 'accessory_upgrade' in reward:
+        print("보상: 악세서리 업그레이드!")
+        nommor.viego.Accessory_level += 1
+        nommor.viego.int += 10
+    elif 'Equipment_upgrade' in reward:
+        print("보상: 장비 업그레이드!")
+        nommor.viego.Weapon_level += 1
+        nommor.viego.str += 10
+        nommor.viego.Helmet_level += 1
+        nommor.viego.max_HP += 50
+        nommor.viego.HP += 50
+        nommor.viego.Armor_level += 1
+        nommor.viego.max_HP += 150
+        nommor.viego.HP += 150
+        nommor.viego.Boots_level += 1
+        nommor.viego.dex += 10
 
     # 상태 업데이트
     player_quest['completed'].append(quest_id)

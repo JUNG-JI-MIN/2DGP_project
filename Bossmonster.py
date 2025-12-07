@@ -56,6 +56,7 @@ class wolf_pohyo:
 class wolf_attack:
     def __init__(self, x,y, wolf):
         self.wolf = wolf
+        self.int = wolf.int
         self.font = load_font('ENCR10B.TTF', 16)
 
         self.frame = 0
@@ -65,7 +66,7 @@ class wolf_attack:
         self.y = y
 
     def update(self):
-        if (self.frame <2000000):
+        if (self.frame <1):
             self.frame = (self.frame + self.ATTACK_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
         else:
             game_world.remove_object(self)
@@ -77,22 +78,20 @@ class wolf_attack:
         offset_y = screen_y - self.y
 
         # 바운딩 박스를 카메라 좌표로 변환
-        left, bottom, right, top = self.get_attack_bb()
-        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y)
+        left, bottom, right, top = self.get_bb()
+        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y, 200, 200, 200)
         pass
     def get_bb(self):
-        return (self.x - 15,
-                self.y - 15,
-                self.x + 15,
-                self.y + 15)
+        return (self.x - 200,
+                self.y - 50,
+                self.x + 200,
+                self.y + 50)
     def get_attack_bb(self):
         return (self.x - 50,
                 self.y - 20,
                 self.x + 50,
                 self.y + 20)
     def handle_collision(self, group, other):
-        if group == 'viego:monster':
-            nommor.viego.HP -= self.wolf.str
             pass
     def handle_attack_collision(self, group, other):
         pass
@@ -167,7 +166,7 @@ class Wolf:
                 if nommor.viego:
                     ball = wolf_attack(self.x, self.y,self)
                     game_world.add_object(ball)
-                    game_world.add_collision_pair('viego:monster_attack', None, ball)
+                    game_world.add_collision_pair('viego:monster', None, ball)
         elif self.walk:
             self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
             self.frame = (self.frame + self.RUN_FRAME_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 4

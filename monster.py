@@ -88,17 +88,7 @@ class fireball:
                 self.x + 15,
                 self.y + 15)
     def handle_collision(self, group, other):
-        if group == 'viego:monster_attack':
-            if not nommor.viego.is_guarding:
-                if nommor.viego.HP > 0:
-                    nommor.viego.HP -=  self.ghost.int / 100
-            else:
-                if nommor.viego.ste > 0:
-                    nommor.viego.ste -=  self.ghost.int / 100
-                else:
-                    if nommor.viego.HP > 0:
-                        nommor.viego.HP -= self.ghost.int / 100
-
+        pass
     def handle_attack_collision(self, group, other):
         pass
     def handle_monster_attack_collision(self,group, other):
@@ -243,7 +233,7 @@ class Ghost:
 
     def handle_attack_collision(self, group, other):
         if group == 'viego:monster':
-            if nommor.viego.is_attacking and not nommor.viego.attack_hit_done :
+            if nommor.viego.is_attacking and not nommor.viego.attack_hit_done:
                 self.HP -= nommor.viego.int / 10
                 nommor.viego.attack_hit_done = True
                 if self.HP <= 0:
@@ -295,18 +285,7 @@ class Yeti_attack:
         pass
 
     def handle_collision(self, group, other):
-        if group == 'viego:monster_attack':
-            game_world.remove_collision_object(self)
-            if not nommor.viego.is_guarding:
-                if nommor.viego.HP > 0:
-                    nommor.viego.HP -= self.yeti.int / 100
-            else:
-                if nommor.viego.ste > 0:
-                    nommor.viego.ste -= self.yeti.int / 100
-                else:
-                    if nommor.viego.HP > 0:
-                        nommor.viego.HP -= self.yeti.int / 100
-            pass
+        pass
 
     def handle_attack_collision(self, group, other):
         pass

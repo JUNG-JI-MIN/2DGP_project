@@ -71,15 +71,7 @@ class wolf_attack:
         else:
             game_world.remove_object(self)
     def draw(self):
-        screen_x, screen_y = game_world.render(self, self.x, self.y)  # 카메라 좌표로 변환
 
-        # 카메라 오프셋 계산
-        offset_x = screen_x - self.x
-        offset_y = screen_y - self.y
-
-        # 바운딩 박스를 카메라 좌표로 변환
-        left, bottom, right, top = self.get_bb()
-        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y, 200, 200, 200)
         pass
     def get_bb(self):
         return (self.x - 200,
@@ -207,20 +199,6 @@ class Wolf:
                 f[0], 1322 - f[1] - f[3], f[2], f[3], 0, 'h', screen_x,
                       screen_y , f[2], f[3])
 
-        # 카메라 오프셋 계산
-        offset_x = screen_x - self.x
-        offset_y = screen_y - self.y
-
-        # 바운딩 박스를 카메라 좌표로 변환
-        left, bottom, right, top = self.get_bb()
-        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y)
-
-        draw_rectangle(
-            screen_x - 200,  # 왼쪽 (x - 200)
-            screen_y - 200,  # 아래쪽 (y - 200)
-            screen_x + 200,  # 오른쪽 (x + 200)
-            screen_y + 200,  # 위쪽 (y + 200)
-        )
 
     def handle_event(self, event):
         pass

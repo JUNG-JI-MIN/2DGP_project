@@ -54,14 +54,6 @@ class thunder:
         f = sheet_list.viego_thunder_attack[int(self.frame)]
         screen_x, screen_y = game_world.render(self.viego, self.x, self.y)
         thunder.image.clip_draw(f[0], 1240 - f[1] - f[3], f[2], f[3], screen_x, screen_y,500,800)
-
-        # 카메라 오프셋 계산
-        offset_x = screen_x - self.x
-        offset_y = screen_y - self.y
-
-        # 바운딩 박스를 카메라 좌표로 변환
-        left, bottom, right, top = self.get_bb()
-        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y)
         pass
 
     def get_bb(self):
@@ -299,13 +291,6 @@ class attack:
         screen_x, screen_y = game_world.render(self.viego, self.viego.x, self.viego.y)
         offset_x = screen_x - self.viego.x
         offset_y = screen_y - self.viego.y
-        draw_rectangle(
-            left + offset_x,
-            bottom + offset_y,
-            right + offset_x,
-            top + offset_y,
-            0,0,255
-        )
         f = sheet_list.viego_attack[self.count][index]
 
         if self.viego.face_dir == 1:  # right
@@ -623,11 +608,3 @@ class Viego:
 
     def draw(self):
         self.state_machine.draw()
-
-        # 바운딩 박스도 카메라 좌표로
-        left, bottom, right, top = self.get_bb()
-        screen_x, screen_y = game_world.render(self, self.x, self.y)
-        offset_x = screen_x - self.x
-        offset_y = screen_y - self.y
-        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y)
-        self.font.draw(screen_x - 70, screen_y + 30, f'(HP : {self.HP:.2f},SP : {self.ste:.2f},CANJUMP : {self.on_ground})', (255, 255, 0))

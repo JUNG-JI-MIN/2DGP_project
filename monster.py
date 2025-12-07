@@ -68,13 +68,6 @@ class fireball:
 
         fireball.img.clip_draw(f[0], 949 - f[1] - f[3], f[2], f[3], screen_x, screen_y)
 
-        # 카메라 오프셋 계산
-        offset_x = screen_x - self.x
-        offset_y = screen_y - self.y
-
-        # 바운딩 박스를 카메라 좌표로 변환
-        left, bottom, right, top = self.get_bb()
-        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y)
 
 
     def get_bb(self):
@@ -186,18 +179,6 @@ class Ghost:
                 f[0], 949 - f[1] - f[3], f[2], f[3], 0, 'h', screen_x,
                       screen_y , f[2], f[3])
 
-        # 카메라 오프셋 계산
-        offset_x = screen_x - self.x
-        offset_y = screen_y - self.y
-
-        # 바운딩 박스를 카메라 좌표로 변환
-        left, bottom, right, top = self.get_bb()
-        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y)
-
-        # 공격 범위를 카메라 좌표로 변환
-        left, bottom, right, top = self.get_attack_bb()
-        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y, 0, 0, 255)
-
     def handle_event(self, event):
         pass
 
@@ -276,12 +257,6 @@ class Yeti_attack:
         pass
 
     def draw(self):
-        screen_x, screen_y = game_world.render(self, self.x, self.y)  # 카메라 좌표로 변환
-        offset_x = screen_x - self.x
-        offset_y = screen_y - self.y
-
-        left, bottom, right, top = self.get_attack_bb()
-        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y, 255, 0, 255)
         pass
 
     def handle_collision(self, group, other):
@@ -380,17 +355,6 @@ class Yeti:
                 f[0], 1116 - f[1] - f[3], f[2], f[3], 0, 'h', screen_x,
                 screen_y, f[2], f[3])
 
-        # 카메라 오프셋 계산
-        offset_x = screen_x - self.x
-        offset_y = screen_y - self.y
-
-        # 바운딩 박스를 카메라 좌표로 변환
-        left, bottom, right, top = self.get_bb()
-        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y)
-
-        # 공격 범위를 카메라 좌표로 변환
-        left, bottom, right, top = self.get_attack_bb()
-        draw_rectangle(left + offset_x, bottom + offset_y, right + offset_x, top + offset_y, 0, 0, 255)
 
     def handle_event(self, event):
         pass

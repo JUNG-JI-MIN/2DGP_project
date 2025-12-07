@@ -354,11 +354,6 @@ class Background:
     def draw(self):
         # 카메라 위치 가져오기
 
-        if self.name == 'background/snow.png':
-            draw_rectangle(0, 0, 1500, 3500, 185, 189, 221, 1, True)
-        if self.name == 'background/desert.png':
-            draw_rectangle(0, 0, 4000, 1500, 149, 136, 156, 1, True)
-
         camera_x = play_mode.cam.x
 
         # 카메라 위치 기준으로 시작 인덱스 계산
@@ -392,11 +387,6 @@ class platform:
         for x, y, w, h in self.platforms:
             screen_x, screen_y = game_world.render(self, x, y)
             self.image.clip_draw(0, 0, self.image.w, self.image.h, screen_x, screen_y, w, h)
-            left = screen_x - w // 2
-            bottom = screen_y - h // 2
-            right = screen_x + w // 2
-            top = screen_y + h // 2
-            draw_rectangle(left, bottom, right, top,0,255,0)
 
     def get_bb(self):
         bb_list = []
@@ -431,12 +421,6 @@ class Tree:
         # 나무 이미지 그리기 (자신의 크기 사용)
         self.image.draw(screen_x, screen_y, 5 * PIXEL_PER_METER, 5 * PIXEL_PER_METER)
 
-        # 디버그용 바운딩 박스 (선택사항)
-        left = screen_x - 75  # 300 // 2
-        bottom = screen_y - 75
-        right = screen_x + 75
-        top = screen_y + 75
-        draw_rectangle(left, bottom, right, top, 255, 0, 0)
     def get_bb(self):
         left = self.x - 75  # 300 // 2
         bottom = self.y - 75
@@ -459,6 +443,7 @@ class Tree:
                 self.hp -= 5
                 if self.hp <= 0:
                     if self.thema == 'snow' and self.stage == 2:
+
                         quest_center.update_quest('gold_tree')
                     else:
                         quest_center.update_quest(f'{self.thema}_tree')

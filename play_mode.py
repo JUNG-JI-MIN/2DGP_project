@@ -117,11 +117,8 @@ def init():
         nommor.UI = UI.UI()
     game_world.add_object(nommor.UI, 2)
 
-    monsters = [monster.Ghost() for _ in range(4)]
+    monsters = [monster.Ghost() for _ in range(10)]
     game_world.add_objects(monsters, 1)
-
-    bosses = [Bossmonster.Wolf() for _ in range(10)]
-    game_world.add_objects(bosses, 1)
 
 
     game_world.add_collision_pair('viego:item', nommor.viego, None)
@@ -137,10 +134,6 @@ def init():
         game_world.add_collision_pair('viego:monster', None, m)
         game_world.add_collision_pair('monster:ground', None, m)
         game_world.add_collision_pair('viego_thunder:monster', None, m)
-    for b in bosses:
-        game_world.add_collision_pair('viego:monster', None, b)
-        game_world.add_collision_pair('monster:ground', None, b)
-        game_world.add_collision_pair('viego_thunder:monster', None, b)
 
 def finish():
     game_world.clear()

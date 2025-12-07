@@ -67,8 +67,14 @@ class UI:
 
         # 스탯 정보
         self.font.draw(15, 445, f'STR: {nommor.viego.str}', (255, 255, 255))
+        self.font.draw(250,445, f'{300 + nommor.viego.str*150}', (255, 255, 255))
+
         self.font.draw(15, 420, f'INT: {nommor.viego.int}', (255, 255, 255))
+        self.font.draw(250, 420, f'{300 + nommor.viego.int * 150}', (255, 255, 255))
+
         self.font.draw(15, 395, f'DEX: {nommor.viego.dex}', (255, 255, 255))
+        self.font.draw(250, 395, f'{300 + nommor.viego.dex * 150}', (255, 255, 255))
+
         self.font.draw(15, 370, f'Money: {nommor.viego.money}', (255, 255, 0))
 
     def draw_item_window(self):
@@ -87,7 +93,8 @@ class UI:
         self.font.draw(495, 480, f'Wolf Items: {nommor.viego.wolf_item}', (200, 150, 255))
         self.font.draw(495, 450, f'forest Items: {nommor.viego.forest_tree_item}', (150, 150, 255))
         self.font.draw(495, 420, f'snow Items: {nommor.viego.snow_tree_item}', (150, 200, 255))
-        self.font.draw(495, 390, f'desert Items: {nommor.viego.deser_tree_item}', (200, 150, 255))
+        self.font.draw(495, 390, f'desert Items: {nommor.viego.desert_tree_item}', (200, 150, 255))
+        self.font.draw(495, 360, f'gold Items: {nommor.viego.gold_tree_item}', (200, 150, 255))
 
     def draw_armor_window(self):
         """장비창 - 화면 중앙"""
@@ -103,20 +110,19 @@ class UI:
         slot_names = ['Weapon', 'Helmet', 'Armor', 'Boots', 'Accessory']
         y_offset = 490
         for slot in slot_names:
+            level = getattr(nommor.viego, f"{slot}_level", 0)
             # 슬롯 배경
             draw_rectangle(260, y_offset - 25, 540, y_offset, 60, 60, 60, 1, True)
             draw_rectangle(260, y_offset - 25, 540, y_offset, 150, 150, 150)
-            self.font.draw(270, y_offset - 15, f'{slot}: Empty', (200, 200, 200))
+            label = f"{slot}: 0" if level == 0 else f"{slot}: Lv{level}"
+            self.font.draw(270, y_offset - 15, label, (200, 200, 200))
             y_offset -= 50
 
-        # 닫기 안내
-        self.font.draw(255, 270, 'Press E to close', (150, 150, 150))
-
     def draw_quest_window(self):
-        # 배경 (화면 오른쪽: 490~790, 중간 높이: 200~550)
-        draw_rectangle(490, 100, 790, 550, 40, 40, 40, 1, True)
+        # 배경 (화면 오른쪽: 490~790, 중간 높이: 50~550)
+        draw_rectangle(490, 50, 790, 550, 40, 40, 40, 1, True)
         # 테두리
-        draw_rectangle(490, 100, 790, 550, 200, 200, 200)
+        draw_rectangle(490, 50, 790, 550, 200, 200, 200)
 
         # 탭 버튼 (상단에 배치)
         self.draw_tab_button(490, 545, 'available', self.quest_tab == 'available')

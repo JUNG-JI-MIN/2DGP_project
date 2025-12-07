@@ -78,11 +78,26 @@ def handle_events():
                 # 퀘스트 클릭 (available 탭에서만)
                 if nommor.UI.quest_tab == 'available':
                     # 퀘스트 목록 영역: x=490~790, y=500부터 60px 간격
-                    if 490 <= mouse_x <= 790 and 200 <= mouse_y <= 500:
+                    if 490 <= mouse_x <= 790 and 50 <= mouse_y <= 550:
                         index = (500 - mouse_y) // 60
                         if 0 <= index < len(quest_center.player_quest['available']):
                             qid = quest_center.player_quest['available'][index]
                             quest_center.start_quest(qid)
+            # 상태창 클릭
+            if nommor.UI.status_chang:
+                if 245 <= mouse_x <= 300:
+                    if 140 <= mouse_y <= 165:
+                        if nommor.viego.money >= 300 + nommor.viego.str*150:
+                            nommor.viego.money -= 300 + nommor.viego.str*150
+                            nommor.viego.str += 5
+                    elif 166 <= event.y <= 190:
+                        if nommor.viego.money >= 300 + nommor.viego.int*150:
+                            nommor.viego.money -= 300 + nommor.viego.int*150
+                            nommor.viego.int += 5
+                    elif 191 <= event.y <= 215:
+                        if nommor.viego.money >= 300 + nommor.viego.dex * 150:
+                            nommor.viego.money -= 300 + nommor.viego.dex * 150
+                            nommor.viego.dex += 5
 
         if event.type == SDL_QUIT:
             game_framework.quit()
